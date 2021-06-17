@@ -147,7 +147,7 @@ for coil = {'X','Y','Z'}
 	w = w./scale_factor';
 	
 	% Visualization
-	if 0
+	%if 0
 		
 		fit = zeros(size(grad));
 		fit(keeps) = R * w;
@@ -165,7 +165,7 @@ for coil = {'X','Y','Z'}
 		% Display and save figure with measured and fitted field
 		fieldfitplot(grad0,fit,nlfit,coil{1},fullfile(out_dir,['fitplot_' coil{1} '.png']));
 	
-	end
+	%end
 	
 	% Scale coefs to units of reference radius (or, uT/refradius per mT/m
 	% applied gradient) via gamma, the reference radius, and the estimated shim
