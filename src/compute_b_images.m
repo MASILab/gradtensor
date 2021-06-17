@@ -108,7 +108,6 @@ end
 % Save bvec image to file
 adjbvec_files = [];
 for b = 1:nb
-	
 	Vout = rmfield(VL(1),{'pinfo','private'});
 	Vout.dt(1) = spm_type('float32');
 	Vout.descrip = 'Adjusted bvec';
