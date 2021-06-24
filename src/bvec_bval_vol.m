@@ -3,12 +3,16 @@
 addpath('/nfs/masi/kanakap/masimatab/trunk/xnatspiders/matlab/justinlib_v1_7_0/niftilib/')
 % for load_untouch_header_only
 addpath('/home/local/VANDERBILT/kanakap/XNAT/TemporalLobe/revised_matlab_functions/')
+% for spm_vol
+addpath(genpath('../external/spm_read_nii'))
+addpath(genpath('../external/spm_reslice'))
+
 
 % Load data
-dwi_path = '/nfs/masi/kanakap/gradtensor_data/PVP_phantom/scans/3tb/posA/INPUTS/dwmri.nii';
+dwi_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/INPUTS/dwmri.nii';
 dwi_vols = nifti_utils.load_untouch_nii4D_vol_scaled(dwi_path,'double');
 b0_vol = dwi_vols(:,:,:,1);
-dwi_vols = dwi_vols(:,:,:,1:end);
+dwi_vols = dwi_vols(:,:,:,2:end);
     
 % get the size from dwmri
 VD = spm_vol(dwi_path);
@@ -18,14 +22,16 @@ D = reshape(D,[],25);
 nv = size(D,1);
 
 % load 
-bvec_path = '/nfs/masi/kanakap/gradtensor_data/PVP_phantom/scans/3tb/posA/INPUTS/dwmri.bvec';
-bval_path = '/nfs/masi/kanakap/gradtensor_data/PVP_phantom/scans/3tb/posA/INPUTS/dwmri.bval';
+bvec_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/INPUTS/dwmri.bvec';
+bval_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/INPUTS/dwmri.bval';
 bvec = load(bvec_path);
-bvec = bvec()
+bvec = bvec();
 bval = load(bval_path);
 nb = length(bval);
 disp(size(bvec))
 disp(size(bval))
+bval(:,1) = [];
+bvec(:,1) = [];
 
 %{
 % for bvec
@@ -73,28 +79,46 @@ end
 %bvals = cat(4,bvals,nifti_utils.load_untouch_nii_vol_scaled(bval_path,'double'));
 
 
-mask_vol = '';
+mask_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/mask.nii';
+mask_vol = nifti_utils.load_untouch_nii_vol_scaled(mask_path,'double');
+mask_vol = logical(mask_vol);
 
 % Initialize DT and exitcode volumes
 exitcode_vol = zeros(size(b0_vol));
 eig_vol = zeros(size(b0_vol,1),size(b0_vol,2),size(b0_vol,3),3);
 primary_vec_vol = zeros(size(eig_vol)); 
 
-[DT_mat, exitcode] = linear_vol_fit(b0_vol,dwi_vols,bvec,bval,mask_vol);
+    for i = 1:size(mask_vol,1)
+        for j = 1:size(mask_vol,2)
+            for k = 1:size(mask_vol,3)
+                if mask_vol(i,j,k)
+                    % Get b0, dwi, bvecs and bvals
+                    b0 = b0_vol(i,j,k);
+                    dwi = squeeze(dwi_vols(i,j,k,:))';
+                    %bvecs = squeeze(bvec(i,j,k,:,:))';
+                    %bvals = squeeze(bval(i,j,k,:))';
 
-if sum(isnan(DT_mat(:))) == 0 && sum(isinf(DT_mat(:))) == 0
-    [v, e] = eig(DT_mat);
-    e = diag(e);
-    [max_eig, pos] = max(e);
-    primary = v(:,pos);
+                    % Get linear model
+                    [DT_mat, exitcode] = linear_vox_fit(b0,dwi,bvec,bval);
+                    
+                    if sum(isnan(DT_mat(:))) == 0 && sum(isinf(DT_mat(:))) == 0
+                    	[v, e] = eig(DT_mat);
+                    	e = diag(e);
+                    	[max_eig, pos] = max(e);
+                    	primary = v(:,pos);
 						
-    eig_vol(:,:,:,:) = e;
-	primary_vec_vol(:,:,:,:) = primary;
-    exitcode_vol(:,:,:) = exitcode;
-end
+                    	eig_vol(i,j,k,:) = e;
+						primary_vec_vol(i,j,k,:) = primary;
+                        exitcode_vol(i,j,k) = exitcode;
+                    end
+                end
+            end
+        end
+    end
 
-out_dir = '/nfs/masi/kanakap/gradtensor_data/PVP_phantom/scans/3tb/posA/INPUTS/';
-out_name = 'try';
+%out_dir = '/nfs/masi/kanakap/gradtensor_data/PVP_phantom/scans/3tb/posA/INPUTS/';
+out_dir = '/home/local/VANDERBILT/kanakap/INPUTS/';
+out_name = 'brain_posB';
 MD = (eig_vol(:,:,:,1) + eig_vol(:,:,:,2) + eig_vol(:,:,:,3))./3;
 FA = sqrt(1/2) .* (sqrt( (eig_vol(:,:,:,1) - eig_vol(:,:,:,2)).^2 + (eig_vol(:,:,:,2) - eig_vol(:,:,:,3)).^2  + (eig_vol(:,:,:,3) - eig_vol(:,:,:,1)).^2 ) ./ sqrt(eig_vol(:,:,:,1).^2 + eig_vol(:,:,:,2).^2 + eig_vol(:,:,:,3).^2));
 nii = load_untouch_nii(dwi_path);
