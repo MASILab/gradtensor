@@ -5,12 +5,12 @@ function compute_L_diffus_sig(dwi_path,bvec_folder,bval_folder,mask_path, out_di
     % INPUTS:
     %   dwi_path is the path to the diffusion weighted nifti. Assumes b0 at
     %       first volume
-    %   bvec_paths is a cell array of paths to bvec niftis. Assumes these
-    %       are with respect to voxels.
-    %   bval_paths is a cell array of paths to bval niftis.
+    %   bvec_folder folder with the corrected voxel wise bvec files 
+    %   bval_folder folder with the corrected voxel wise bval files
     %   mask_path is an optional path to mask nifti.
     %   out_dir is a path to a directory in which to save metrics
     %   out_name is a prefix to the generated metric nifti filenames
+    %   rL_path resampled L
     
     % Load data
     dwmri_vols = nifti_utils.load_untouch_nii4D_vol_scaled(dwi_path,'double');
