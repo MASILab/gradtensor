@@ -9,7 +9,7 @@ addpath(genpath('../external/spm_reslice'))
 
 
 % Load data
-dwi_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/INPUTS/dwmri.nii';
+dwi_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/OUTPUTS_future_fieldmap/p_3tb_posB_mask_inv_Lest_sig.nii';
 dwi_vols = nifti_utils.load_untouch_nii4D_vol_scaled(dwi_path,'double');
 b0_vol = dwi_vols(:,:,:,1);
 dwi_vols = dwi_vols(:,:,:,2:end);
@@ -117,8 +117,8 @@ primary_vec_vol = zeros(size(eig_vol));
     end
 
 %out_dir = '/nfs/masi/kanakap/gradtensor_data/PVP_phantom/scans/3tb/posA/INPUTS/';
-out_dir = '/home/local/VANDERBILT/kanakap/INPUTS/';
-out_name = 'brain_posB';
+out_dir = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/OUTPUTS_future_fieldmap/';
+out_name = 'posB_inv_Lest';
 MD = (eig_vol(:,:,:,1) + eig_vol(:,:,:,2) + eig_vol(:,:,:,3))./3;
 FA = sqrt(1/2) .* (sqrt( (eig_vol(:,:,:,1) - eig_vol(:,:,:,2)).^2 + (eig_vol(:,:,:,2) - eig_vol(:,:,:,3)).^2  + (eig_vol(:,:,:,3) - eig_vol(:,:,:,1)).^2 ) ./ sqrt(eig_vol(:,:,:,1).^2 + eig_vol(:,:,:,2).^2 + eig_vol(:,:,:,3).^2));
 nii = load_untouch_nii(dwi_path);
