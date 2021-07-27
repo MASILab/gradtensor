@@ -51,6 +51,7 @@ function dti_voxel_fit(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_
     exitcode_vol = zeros(size(b0_vol));
     eig_vol = zeros(size(b0_vol,1),size(b0_vol,2),size(b0_vol,3),3);
     primary_vec_vol = zeros(size(eig_vol)); 
+    DT_rot_lest_corr_bx_posB = zeros(3,3,size(dwi_vols,1),size(dwi_vols,2),size(dwi_vols,3));
     % Cycle over and compute DT voxel-wise
     for i = 1:size(mask_vol,1)
         for j = 1:size(mask_vol,2)
@@ -66,6 +67,7 @@ function dti_voxel_fit(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_
                     [DT_mat, exitcode] = linear_vox_fit(b0,dwi,bvecs,bvals);
                     
                     if sum(isnan(DT_mat(:))) == 0 && sum(isinf(DT_mat(:))) == 0
+                        DT_rot_lest_corr_bx_posB(:,:,i,j,k) = DT_mat(:,:);
                     	[v, e] = eig(DT_mat);
                     	e = diag(e);
                     	[max_eig, pos] = max(e);
@@ -79,7 +81,7 @@ function dti_voxel_fit(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_
             end
         end
     end
-    
+    save('DT_rot_lest_corr_bx_posB.mat', 'DT_rot_lest_corr_bx_posB');
     MD = (eig_vol(:,:,:,1) + eig_vol(:,:,:,2) + eig_vol(:,:,:,3))./3;
     FA = sqrt(1/2) .* (sqrt( (eig_vol(:,:,:,1) - eig_vol(:,:,:,2)).^2 + (eig_vol(:,:,:,2) - eig_vol(:,:,:,3)).^2  + (eig_vol(:,:,:,3) - eig_vol(:,:,:,1)).^2 ) ./ sqrt(eig_vol(:,:,:,1).^2 + eig_vol(:,:,:,2).^2 + eig_vol(:,:,:,3).^2));
     nii = load_untouch_nii(dwi_path);

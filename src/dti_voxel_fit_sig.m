@@ -9,7 +9,10 @@ addpath(genpath('../external/spm_reslice'))
 
 
 % Load data
-dwi_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/OUTPUTS_future_fieldmap/p_3tb_posB_mask_inv_Lest_sig.nii';
+%dwi_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/INPUTS/rot_45_est_sig.nii';
+%dwi_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/OUTPUTS_signal_estimate/posB_3tb_Lest_sig.nii';
+dwi_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/OUTPUTS_simple_method_future_fieldmap/rot_Lest_corrected_sig.nii';
+%dwi_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/ten_est/rot45_Lest_sig.nii';
 dwi_vols = nifti_utils.load_untouch_nii4D_vol_scaled(dwi_path,'double');
 b0_vol = dwi_vols(:,:,:,1);
 dwi_vols = dwi_vols(:,:,:,2:end);
@@ -33,52 +36,6 @@ disp(size(bval))
 bval(:,1) = [];
 bvec(:,1) = [];
 
-%{
-% for bvec
-out_dir = '/nfs/masi/kanakap/gradtensor_data/PVP_phantom/scans/3tb/posA/INPUTS/bvecs';
-adjbvec = nan(nv,3,nb);
-bvec_files = [];
-for b = 1:nb
-    Vout = rmfield(VD(1),{'pinfo','private'});
-	Vout.dt(1) = spm_type('float32');
-	Vout.descrip = 'dwmri bvec vol';
-    bvec_files{b,1} = fullfile(out_dir,sprintf('bvec_%04d.nii',b));
-    Vout.fname = bvec_files{b,1};
-    
-    for n = 1:3
-		Vout.n(1) = n;
-		spm_write_vol(Vout,reshape(adjbvec(:,n,b),Vout.dim));
-    end
-	
-	system(['gzip -f ' Vout.fname]);
-    
-end
-
-
-out_dir = '/nfs/masi/kanakap/gradtensor_data/PVP_phantom/scans/3tb/posA/INPUTS/bvals';
-adjbval = nan(nv,1,nb);
-bval_files = [];
-for b = 1:nb
-    Vout = rmfield(VD(1),{'pinfo','private'});
-	Vout.dt(1) = spm_type('float32');
-	Vout.descrip = 'dwmri bval vol';
-    bval_files{b,1} = fullfile(out_dir,sprintf('bval_%04d.nii',b));
-    Vout.fname = bval_files{b,1};
-    spm_write_vol(Vout,reshape(adjbval(:,b),Vout.dim));
-	system(['gzip -f ' Vout.fname]);
-    
-end
-%}
-
-%bvecs = [];
-%bvecs = cat(4,bvecs,permute(nifti_utils.load_untouch_nii_vol_scaled(bvec_path,'double'),[1 2 3 5 4]));
-
-
-
-%bvals = [];
-%bvals = cat(4,bvals,nifti_utils.load_untouch_nii_vol_scaled(bval_path,'double'));
-
-
 mask_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/mask.nii';
 mask_vol = nifti_utils.load_untouch_nii_vol_scaled(mask_path,'double');
 mask_vol = logical(mask_vol);
@@ -87,7 +44,7 @@ mask_vol = logical(mask_vol);
 exitcode_vol = zeros(size(b0_vol));
 eig_vol = zeros(size(b0_vol,1),size(b0_vol,2),size(b0_vol,3),3);
 primary_vec_vol = zeros(size(eig_vol)); 
-
+DT_rot_lest_corr_posB = zeros(3,3,size(dwi_vols,1),size(dwi_vols,2),size(dwi_vols,3));
     for i = 1:size(mask_vol,1)
         for j = 1:size(mask_vol,2)
             for k = 1:size(mask_vol,3)
@@ -102,6 +59,7 @@ primary_vec_vol = zeros(size(eig_vol));
                     [DT_mat, exitcode] = linear_vox_fit(b0,dwi,bvec,bval);
                     
                     if sum(isnan(DT_mat(:))) == 0 && sum(isinf(DT_mat(:))) == 0
+                        DT_rot_lest_corr_posB(:,:,i,j,k) = DT_mat(:,:);
                     	[v, e] = eig(DT_mat);
                     	e = diag(e);
                     	[max_eig, pos] = max(e);
@@ -116,9 +74,12 @@ primary_vec_vol = zeros(size(eig_vol));
         end
     end
 
+save('DT_rot_lest_corr_posB.mat', 'DT_rot_lest_corr_posB');
 %out_dir = '/nfs/masi/kanakap/gradtensor_data/PVP_phantom/scans/3tb/posA/INPUTS/';
-out_dir = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/OUTPUTS_future_fieldmap/';
-out_name = 'posB_inv_Lest';
+%out_dir = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/OUTPUTS_signal_estimate/';
+out_dir = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/OUTPUTS_simple_method_future_fieldmap/';
+%out_dir = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/INPUTS/';
+out_name = 'rot_Lest_corr';
 MD = (eig_vol(:,:,:,1) + eig_vol(:,:,:,2) + eig_vol(:,:,:,3))./3;
 FA = sqrt(1/2) .* (sqrt( (eig_vol(:,:,:,1) - eig_vol(:,:,:,2)).^2 + (eig_vol(:,:,:,2) - eig_vol(:,:,:,3)).^2  + (eig_vol(:,:,:,3) - eig_vol(:,:,:,1)).^2 ) ./ sqrt(eig_vol(:,:,:,1).^2 + eig_vol(:,:,:,2).^2 + eig_vol(:,:,:,3).^2));
 nii = load_untouch_nii(dwi_path);
@@ -128,5 +89,5 @@ nii.img = FA;
 nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_fa']),nii,'double');
 nii.img = primary_vec_vol;
 nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_primary_eigvec']),nii,'double');
-    
+   
 

@@ -33,6 +33,24 @@ D(:,:,:,3,1) = DT_vol(:,:,:,3);
 D(:,:,:,3,2) = DT_vol(:,:,:,5);
 D(:,:,:,3,3) = DT_vol(:,:,:,6);
 
+gunzip('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_future_fieldmap/L_resamp.nii.gz')
+rL_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_future_fieldmap/L_resamp.nii';
+% Load resampled L
+VL = spm_vol(rL_path);
+L = spm_read_vols(VL);
+%L = reshape(L,[],9);
+nv = size(L,1);
+vL = zeros(3,3,size(L,1),size(L,2),size(L,3));
+vL(1,1,:,:,:) = L(:,:,:,1);
+vL(1,2,:,:,:) = L(:,:,:,2);
+vL(1,3,:,:,:) = L(:,:,:,3);
+vL(2,1,:,:,:) = L(:,:,:,4);
+vL(2,2,:,:,:) = L(:,:,:,5);
+vL(2,3,:,:,:) = L(:,:,:,6);
+vL(3,1,:,:,:) = L(:,:,:,7);
+vL(3,2,:,:,:) = L(:,:,:,8);
+vL(3,3,:,:,:) = L(:,:,:,9);
+
 est_dwi = zeros(size(dwi_vols));
 for i = 1:length(bvals)
     g = bvecs(:,i);
@@ -41,7 +59,7 @@ for i = 1:length(bvals)
     for x = 1:size(D,1)
         for y = 1:size(D,2)
             for z = 1:size(D,3)
-                est_dwi(x,y,z,i) = b0_vol(x,y,z)*exp(-1*b*g'*squeeze(D(x,y,z,:,:))*g);
+                est_dwi(x,y,z,i) = b0_vol(x,y,z)*exp(-1*b*g'*squeeze(vL(:,:,x,y,z))'*squeeze(D(x,y,z,:,:))*squeeze(vL(:,:,x,y,z))*g);
             end
         end
     end    
@@ -53,7 +71,7 @@ dwmri_est(:,:,:,1) = b0_vol ;
 dwmri_est(:,:,:,2:end) = est_dwi ; 
 nii = load_untouch_nii(dwi_path);
 nii.img = dwmri_est;
-nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_est_sig']),nii,'double');
+nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Lest_sig']),nii,'double');
 
 diff = abs(est_dwi - dwi_vols);
 noise = std(diff,0,4);

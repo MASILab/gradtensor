@@ -1,4 +1,4 @@
-function apply_gradtensor_to_b(varargin)
+function apply_simple_correction(varargin)
 
 % Parse inputs (defaults specified here)
 P = inputParser;

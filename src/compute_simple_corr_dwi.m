@@ -89,93 +89,22 @@ for i = 1:length(bval)
         for y = 1:size(dwmri_vols,2)
             for z = 1:size(dwmri_vols,3)
                 if mask_vol(x,y,z)
+                    %dwmri_vols(x,y,z,i) = rot90(dwmri_vols(x,y,z,i));
                     L_mat = squeeze(vL(:,:,x,y,z));
                     new_dwi_signal(x,y,z,i) = b0_vol(x,y,z)*((dwmri_vols(x,y,z,i)/b0_vol(x,y,z))^ (det(L_mat(:,:))^-2));
                 end
             end
         end
     end
-
 end
 
 size(new_dwi_signal)
-out_name = 'new_meth';
+out_name = 'rot_Lest';
 %corrected_signal = zeros(size(dwmri_vols));
 %corrected_signal(:,:,:,1) = b0_vol ;
-%corrected_signal(:,:,:,2:end) = new_dwi_signal ;
+%corrected_signal(:,:,:,2:end) = dwi_vols ;
 nii = load_untouch_nii(refimg_file);
 nii.img = new_dwi_signal;
+%nii.img = corrected_signal;
 nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_corrected_sig']),nii,'double');
 
-%{
-% Flip sign of X coordinate of bvec. I.e. FSL convention for bvecs: bvecs
-% are always LAS while NII header world coords are always RAS.
-%    https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FDT/FAQ#What_conventions_do_the_bvecs_use.3F
-%    http://www.mrtrix.org/2016/04/15/bug-in-fsl-bvecs-handling/
-disp('Flipping bvec X (LAS to RAS)')
-bvec(1,:) = -bvec(1,:);
-flipbvecs = true;
-
-
-% Adjust bvalues and bvectors
-adjbvec = nan(nv,3,nb);
-adjbval = nan(nv,1,nb);
-
-
-for v = 1:nv
-	
-	% Most simply, the adjusted bvec is simply L * bvec. Here we are
-	% operating in the image space.
-	ab = vL(:,:,v) * bvec;
-	
-	% The bvecs were length 1 before adjustment, so now compute the length
-	% change and adjust bvals accordingly. NOTE: adjust bval by the square
-	% of the length, because the b value has a G^2 term but the vector
-	% length is for G.
-	len2 = sum(ab.^2);
-	adjbval(v,:) = bval .* len2;
-	
-	% Re-normalize bvecs to length 1 to compensate for the b value
-	% adjustment we just made. Skip cases where b=0.
-	len = sqrt(sum(ab.^2));
-	lenkeeps = len~=0;
-	ab(:,lenkeeps) = ab(:,lenkeeps) ./ repmat(len(lenkeeps),3,1);
-	adjbvec(v,:,:) = ab;
-	
-end
-
-% Flip the bvec X back if we need to
-if flipbvecs
-	adjbvec(:,1,:) = -adjbvec(:,1,:);
-end
-
-% Save bvec image to file
-adjbvec_files = [];
-for b = 1:nb
-	Vout = rmfield(VL(1),{'pinfo','private'});
-	Vout.dt(1) = spm_type('float32');
-	Vout.descrip = 'Adjusted bvec';
-	adjbvec_files{b,1} = fullfile(out_dir,sprintf('bvec_%04d.nii',b));
-	Vout.fname = adjbvec_files{b,1};
-	
-	for n = 1:3
-		Vout.n(1) = n;
-		spm_write_vol(Vout,reshape(adjbvec(:,n,b),Vout.dim));
-	end
-	
-	system(['gzip -f ' Vout.fname]);
-
-end
-
-% Save bval image to file
-adjbval_files = [];
-for b = 1:nb
-	Vout = rmfield(VL(1),{'pinfo','private'});
-	Vout.dt(1) = spm_type('float32');
-	Vout.descrip = 'Adjusted bval';
-	adjbval_files{b,1} = fullfile(out_dir,sprintf('bval_%04d.nii',b));
-	Vout.fname = adjbval_files{b,1};
-	spm_write_vol(Vout,reshape(adjbval(:,b),Vout.dim));
-	system(['gzip -f ' Vout.fname]);
-end
-%}
