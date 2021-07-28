@@ -94,13 +94,13 @@ disp(zlim);
 %xlim([1.0e-03 * -1   1.0e-03 * 1]);
 %ylim([1.0e-02 * -0.2   1.0e-02 * 0.2]);
 %zlim([1.0e-03 * -0.8   1.0e-03 * 0.8]);
-%xlim([-3 3])
-%ylim([-8 8])
-%zlim([-14 14])
-xlim([-3 3])
-ylim([-8 8])
-zlim([-9 9])
-view([0 90]);
+xlim([-0.005 0.005])
+ylim([-0.006 0.006])
+zlim([-0.002 0.002])
+%xlim([-7 7])
+%ylim([-0.03 0.03])
+%zlim([-0.06 0.06])
+%view([90 0]);
 set(gca,'GridLine','none');
 %set(gca,'xlimMode',[-1 0.003]);
 set(gca,'XTick')
