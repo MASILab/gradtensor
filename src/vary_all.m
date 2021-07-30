@@ -1,6 +1,11 @@
 %function sim_dt_FA_MD(MD,FA)
+min = 0;
+FA_max = 0.9;
+n = 100;
+FA = min + rand(1,n)*(FA_max-min);
+
     MD = 0.0008;
-    FA = 0.3;
+    %FA = 0.3;
     FA_sim_corpt_x = zeros(size(1:n));
     FA_true_x = zeros(size(1:n));
     FA_sim_x = zeros(size(1:n));
@@ -15,8 +20,9 @@
     %FA = 0.5;
     %l1 = (MD) * (1 + (2*FA) / sqrt( 3 - (2 * FA^2)));
     %lprep = (MD) * (1 - FA / sqrt( 3 - (2 * FA^2)));
-    lprep = MD * (1 - FA/ (3-2*FA^2)^(1/2));
-% for PVE
+    for j = 1:n
+    lprep = MD * (1 - FA(j)/ (3-2*FA(j)^2)^(1/2));
+    % for PVE
     %for i = 1:n
      
     %a1 = 0.0;
@@ -25,7 +31,6 @@
     min = 0;
     theta_max = 100;
     phi_max = 90;
-    n = 100;
 
     theta = min + rand(1,n)*(theta_max-min); %random 0-180 2 * pi * unifrnd(a1,b1,sz);
     phi = min + rand(1,n)*(phi_max-min); % 0-90 acos(1 - 2 * unifrnd(a1,b1,sz));
@@ -37,9 +42,10 @@
         PVE = [x y z];
         
         DT_true = sim_dt(PVE, MD,  lprep);
+	
 
         
-        [S_corpt, S, abvec, abval, g, b] = sim_signal(DT_true);
+        [S_corpt, S, abvec, abval, g, b] = sim_signal(DT_true, L_mat);
          
          FA_true = compute_FA(DT_true);
          FA_true_x(i) = FA_true;
@@ -65,4 +71,4 @@
         %FA = compute_FA(D);
         %plotDTI(D_true,0.002);
     end
-%end
+end

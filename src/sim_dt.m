@@ -50,7 +50,7 @@ function D = sim_dt(n1_v, D0, dPerpNorm1) %trb, dirs_m)
 
     % Define true diffusion properties. Assume axisymmetric diffusion (with the
     % same trace) in both fibers:
-    dPerp1 = dPerpNorm1 * D0;
+    dPerp1 = dPerpNorm1;% * D0;
     dPara1 = 3*D0 - 2*dPerp1;
 
     D = dPara1*(n1_v * n1_v.') + dPerp1*(m1_v * m1_v.') + ...

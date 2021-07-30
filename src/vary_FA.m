@@ -1,11 +1,19 @@
 %function sim_dt_FA_MD(MD,FA)
+min = 0;
+FA_max = 0.9;
+n = 100;
+FA = min + rand(1,n)*(FA_max-min);
+
+FA_sim_corpt_x = zeros(size(1:n));
+FA_true_x = zeros(size(1:n));
+FA_sim_x = zeros(size(1:n));
+FA_corr_bx_x = zeros(size(1:n));
+FA_corr_sm_x = zeros(size(1:n));
+
+for i = 1:n
     MD = 0.0008;
-    FA = 0.3;
-    FA_sim_corpt_x = zeros(size(1:n));
-    FA_true_x = zeros(size(1:n));
-    FA_sim_x = zeros(size(1:n));
-    FA_corr_bx_x = zeros(size(1:n));
-    FA_corr_sm_x = zeros(size(1:n));
+
+
     %MD = 0.0008;
     % Trace fixed
     %TrD = 0.0021; %derek jones
@@ -15,25 +23,22 @@
     %FA = 0.5;
     %l1 = (MD) * (1 + (2*FA) / sqrt( 3 - (2 * FA^2)));
     %lprep = (MD) * (1 - FA / sqrt( 3 - (2 * FA^2)));
-    lprep = MD * (1 - FA/ (3-2*FA^2)^(1/2));
+    lprep = MD * (1 - FA(i)/ (3-2*FA(i)^2)^(1/2));
 % for PVE
     %for i = 1:n
      
     %a1 = 0.0;
     %b1 = 0.1;
     %sz = [1 n];
-    min = 0;
-    theta_max = 100;
-    phi_max = 90;
-    n = 100;
 
-    theta = min + rand(1,n)*(theta_max-min); %random 0-180 2 * pi * unifrnd(a1,b1,sz);
-    phi = min + rand(1,n)*(phi_max-min); % 0-90 acos(1 - 2 * unifrnd(a1,b1,sz));
+
+    theta = 60; %random 0-180 2 * pi * unifrnd(a1,b1,sz);
+    phi = 30; % 0-90 acos(1 - 2 * unifrnd(a1,b1,sz));
         
-    for i = 1:n
-        x = sin(phi(i)) * cos(theta(i));
-        y = sin(phi(i)) * sin(theta(i));
-        z = cos(phi(i));
+ 
+        x = sin(phi) * cos(theta);
+        y = sin(phi) * sin(theta);
+        z = cos(phi);
         PVE = [x y z];
         
         DT_true = sim_dt(PVE, MD,  lprep);
@@ -63,6 +68,6 @@
         FA_sim_x(i) = FA_sim;        
         
         %FA = compute_FA(D);
-        %plotDTI(D_true,0.002);
-    end
+        %plotDTI(DT_true,0.002);
+end
 %end

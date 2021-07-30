@@ -92,20 +92,21 @@ disp(xlim);
 disp(ylim);
 disp(zlim);
 %xlim([1.0e-03 * -1   1.0e-03 * 1]);
-%ylim([1.0e-02 * -0.2   1.0e-02 * 0.2]);
-%zlim([1.0e-03 * -0.8   1.0e-03 * 0.8]);
-xlim([-0.005 0.005])
-ylim([-0.006 0.006])
-zlim([-0.002 0.002])
+xlim([-0.0021 0.0021])
+ylim([1.0e-03 * -0.8   1.0e-03 * 0.8]);
+zlim([1.0e-03 * -0.8   1.0e-03 * 0.8]);
+%xlim([-0.0002 0.0002]);
+%ylim([-0.0002 0.0002]);
+%zlim([-0.0002 0.0002]);
 %xlim([-7 7])
 %ylim([-0.03 0.03])
 %zlim([-0.06 0.06])
 %view([90 0]);
 set(gca,'GridLine','none');
 %set(gca,'xlimMode',[-1 0.003]);
-set(gca,'XTick')
-set(gca,'YTick')
-set(gca,'ZTick')
+set(gca,'XTick');
+set(gca,'YTick');
+set(gca,'ZTick');
 %alpha 0.5
 %shading interp
 %colormap([0.8 0.8 0.8])

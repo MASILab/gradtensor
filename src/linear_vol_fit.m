@@ -44,8 +44,8 @@ function [DT_vol, exitcode_vol] = linear_vol_fit(b0_vol,dwi_vol,bvecs,bvals,mask
     dwi_vol = reshape(dwi_vol,[],dwi_size(4));
 
     % Fit using linear least squares
-    disp(size(pinv(A)));
-    disp(size(permute(log(abs(bsxfun(@rdivide,dwi_vol,b0_vol))),[2 1])));
+    %disp(size(pinv(A)));
+    %disp(size(permute(log(abs(bsxfun(@rdivide,dwi_vol,b0_vol))),[2 1])));
     DT_vol = pinv(A)*permute(log(abs(bsxfun(@rdivide,dwi_vol,b0_vol))),[2 1]);
     DT_vol = reshape(permute(DT_vol,[2 1]),dwi_size(1),dwi_size(2),dwi_size(3),[]);
 
