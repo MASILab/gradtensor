@@ -86,15 +86,15 @@ for i=1:nx
         end
     end
 end
-axis equal
-alpha 0.5
-disp(xlim);
-disp(ylim);
-disp(zlim);
+axis equal;
+alpha 0.5;
+%disp(xlim);
+%disp(ylim);
+%disp(zlim);
 %xlim([1.0e-03 * -1   1.0e-03 * 1]);
-xlim([-0.0021 0.0021])
-ylim([1.0e-03 * -0.8   1.0e-03 * 0.8]);
-zlim([1.0e-03 * -0.8   1.0e-03 * 0.8]);
+%xlim([-0.0021 0.0021]);
+%ylim([1.0e-03 * -0.8   1.0e-03 * 0.8]);
+%zlim([1.0e-03 * -0.8   1.0e-03 * 0.8]);
 %xlim([-0.0002 0.0002]);
 %ylim([-0.0002 0.0002]);
 %zlim([-0.0002 0.0002]);
@@ -111,7 +111,7 @@ set(gca,'ZTick');
 %shading interp
 %colormap([0.8 0.8 0.8])
 %lighting phong
-light('Position',[0 0 1])%,'Style','infinite','Color',[ 1.000 0.584 0.000]);
+%light('Position',[0 0 1]);%,'Style','infinite','Color',[ 1.000 0.584 0.000]);
 %hold on
 %fprintf(1,'\nIf you use plotDTI.m please cite the following work:\n');
 %fprintf(1,'A. Barmpoutis, B. C. Vemuri, T. M. Shepherd, and J. R. Forder "Tensor splines for\n');

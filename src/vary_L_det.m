@@ -1,4 +1,5 @@
 %function sim_dt_FA_MD(MD,FA)
+function [L_det, vL] = vary_L_det()
 % for nifti_utils
 addpath('/nfs/masi/kanakap/masimatab/trunk/xnatspiders/matlab/justinlib_v1_7_0/niftilib/')
 % for load_untouch_header_only
@@ -8,21 +9,6 @@ addpath(genpath('../external/spm_read_nii'))
 addpath(genpath('../external/spm_reslice'))
 
 
-flags = struct( ...
-        'mask',true, ...
-        'mean',false, ...
-        'interp',1, ...
-        'which',1, ...
-        'wrap',[0 0 0], ...
-        'prefix','r' ...
-        );
-
-m = 100;
-FA_sim_corpt_x = zeros(size(1:m));
-FA_true_x = zeros(size(1:m));
-FA_sim_x = zeros(size(1:m));
-FA_corr_bx_x = zeros(size(1:m));
-FA_corr_sm_x = zeros(size(1:m));
 
 %Limg_file = '/home/local/VANDERBILT/kanakap/gradtensor_data/fieldmaps/3tb_future_fieldmap/OUTPUTS/L.nii.gz';
 %refimg_file ='/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/ten_est/rot_Lest_sig.nii';
@@ -31,19 +17,7 @@ out_dir ='/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_reposi
 mask_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/mask.nii';
 mask_vol = nifti_utils.load_untouch_nii_vol_scaled(mask_path,'double');
 mask_vol = logical(mask_vol);
-% Unzip
-% if strcmp(Limg_file(end-2:end),'.gz')
-%         system(['gunzip -kf ' Limg_file]);
-%         Limg_file = Limg_file(1:end-3);
-% end
-% if strcmp(refimg_file(end-2:end),'.gz')
-%         system(['gunzip -kf ' refimg_file]);
-%         refimg_file = refimg_file(1:end-3);
-% end
-%spm_reslice({refimg_file; Limg_file},flags);
-%[p,n,e] = fileparts(Limg_file);
-%rLimg_file = fullfile(p,['r' n e]);
-%movefile(rLimg_file,fullfile(out_dir,'L_resamp.nii'));
+
 rLimg_file = fullfile(out_dir,'L_resamp.nii');
 VL = spm_vol(rLimg_file);
 L = spm_read_vols(VL);
@@ -59,7 +33,7 @@ vL(2,3,:,:,:) = L(:,:,:,6);
 vL(3,1,:,:,:) = L(:,:,:,7);
 vL(3,2,:,:,:) = L(:,:,:,8);
 vL(3,3,:,:,:) = L(:,:,:,9);
-%L_det = zeros(size(L,1),size(L,2),size(L,3));
+L_det = zeros(size(L,1),size(L,2),size(L,3));
 %L_det = reshape(L_det,[],96*96*68);
 %L_det = zeros(size(1:96*96*68));
 for x = 1:size(L,1)
@@ -68,13 +42,32 @@ for x = 1:size(L,1)
                 if mask_vol(x,y,z)
                     %dwmri_vols(x,y,z,i) = rot90(dwmri_vols(x,y,z,i));
                     L_mat = squeeze(vL(:,:,x,y,z));
-                    if det(L_mat(:,:)) ~= 0
-                        L_det(x,y,z) = det(L_mat(:,:));
-                    end
+                    L_det(x,y,z) = det(L_mat(:,:));
                 end
             end
         end
 end
+%rL_det = reshape(L_det,[],size(L_det,1)*size(L_det,2)*size(L_det,3));
+%rL_det(rL_det == 0) = [];
+
+
+%A= L_det;
+%figure;imagesc(A(:,:,50))
+%figure;imagesc(A(:,:,32))
+%figure;imagesc(A(:,:,12))
+%blah = A(A>0);
+%[out,idx] = sort(blah,'ascend');
+%indices_to_chose = round(linspace(1,119862,100));
+%figure; plot(out(indices_to_chose));
+%vec = out(indices_to_chose);
+%for i = 1:100
+%  [r,c,v] = ind2sub(size(A),find(A == vec(i)));
+%  det_vals(i) = A(r,c,v);
+%  locations(:,i) = [r c v];
+%end
+    
+   
+
 %end
 %{
 maxi = 96;
@@ -146,6 +139,7 @@ for v = 1:m
         
         %FA = compute_FA(D);
         %plotDTI(DT_true,0.002);
+end
 end
 %end
 %}
