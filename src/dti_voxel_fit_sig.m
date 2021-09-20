@@ -11,7 +11,7 @@ addpath(genpath('../external/spm_reslice'))
 % Load data
 %dwi_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/INPUTS/rot_45_est_sig.nii';
 %dwi_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/OUTPUTS_signal_estimate/posB_3tb_Lest_sig.nii';
-dwi_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/OUTPUTS_simple_method_future_fieldmap/rot_Lest_corrected_sig.nii';
+dwi_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/INPUTS/dwmri.nii';
 %dwi_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/ten_est/rot45_Lest_sig.nii';
 dwi_vols = nifti_utils.load_untouch_nii4D_vol_scaled(dwi_path,'double');
 b0_vol = dwi_vols(:,:,:,1);
@@ -74,12 +74,12 @@ DT_rot_lest_corr_posB = zeros(3,3,size(dwi_vols,1),size(dwi_vols,2),size(dwi_vol
         end
     end
 
-save('DT_rot_lest_corr_posB.mat', 'DT_rot_lest_corr_posB');
+%save('DT_rot_lest_corr_posB.mat', 'DT_rot_lest_corr_posB');
 %out_dir = '/nfs/masi/kanakap/gradtensor_data/PVP_phantom/scans/3tb/posA/INPUTS/';
 %out_dir = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/OUTPUTS_signal_estimate/';
-out_dir = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/OUTPUTS_simple_method_future_fieldmap/';
-%out_dir = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/INPUTS/';
-out_name = 'rot_Lest_corr';
+%out_dir = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/OUTPUTS_future_fieldmap/';
+out_dir = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/INPUTS/';
+out_name = 'dwmri';
 MD = (eig_vol(:,:,:,1) + eig_vol(:,:,:,2) + eig_vol(:,:,:,3))./3;
 FA = sqrt(1/2) .* (sqrt( (eig_vol(:,:,:,1) - eig_vol(:,:,:,2)).^2 + (eig_vol(:,:,:,2) - eig_vol(:,:,:,3)).^2  + (eig_vol(:,:,:,3) - eig_vol(:,:,:,1)).^2 ) ./ sqrt(eig_vol(:,:,:,1).^2 + eig_vol(:,:,:,2).^2 + eig_vol(:,:,:,3).^2));
 nii = load_untouch_nii(dwi_path);
