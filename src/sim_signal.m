@@ -1,4 +1,4 @@
-function [S, SS, abvec, abval, g, b] = sim_signal(DT_mat, L_mat)
+function [S_corpt, SS, abvec, abval, g, b] = sim_signal(DT_mat, L_mat)
     %DT_mat = sim_dt(phi,theta,psi);
     g = [-0.000737 0.79383 0.63632 -0.14534 -0.39912 -0.88473; 0.00026791 -0.41093 0.62867 -0.88214 0.80005 -0.13373; 1 0.44829 0.44707 0.448 0.44791 0.44652];
     b = [1000 1000 1000 1000 1000 1000];
@@ -19,7 +19,7 @@ function [S, SS, abvec, abval, g, b] = sim_signal(DT_mat, L_mat)
         %bvals, and bvecs
         % Most simply, the adjusted bvec is simply L * bvec. Here we are
         % operating in the image space.
-        og(1) = -og(1);
+        %og(1) = -og(1);
         %disp(L_mat);
         ab = L_mat * og;
 
@@ -37,9 +37,9 @@ function [S, SS, abvec, abval, g, b] = sim_signal(DT_mat, L_mat)
         ab(:,lenkeeps) = ab(:,lenkeeps) ./ repmat(len(lenkeeps),3,1);
         adjbvec = ab;
 
-        adjbvec(1) = -adjbvec(1);
+        %adjbvec(1) = -adjbvec(1);
 
-        S(v) = b0*exp(-1*adjbval*adjbvec'*DT_mat(:,:)*adjbvec);
+        S_corpt(v) = b0*exp(-1*adjbval*adjbvec'*DT_mat(:,:)*adjbvec);
 
         abvec(:,v) = adjbvec; 
         abval(v) = adjbval;

@@ -51,11 +51,11 @@ function dti_voxel_fit(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_
     exitcode_vol = zeros(size(b0_vol));
     eig_vol = zeros(size(b0_vol,1),size(b0_vol,2),size(b0_vol,3),3);
     primary_vec_vol = zeros(size(eig_vol)); 
-    DT_rot_lest_corr_bx_posB = zeros(3,3,size(dwi_vols,1),size(dwi_vols,2),size(dwi_vols,3));
+    %DT_rot_lest_corr_bx_posB = zeros(3,3,size(dwi_vols,1),size(dwi_vols,2),size(dwi_vols,3));
     % Cycle over and compute DT voxel-wise
-    for i = 1:size(mask_vol,1)
-        for j = 1:size(mask_vol,2)
-            for k = 1:size(mask_vol,3)
+    for i = 58%1:size(mask_vol,1)
+        for j = 52%1:size(mask_vol,2)
+            for k = 41%1:size(mask_vol,3)
                 if mask_vol(i,j,k)
                     % Get b0, dwi, bvecs and bvals
                     b0 = b0_vol(i,j,k);
@@ -64,10 +64,33 @@ function dti_voxel_fit(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_
                     bvals = squeeze(bval_vols(i,j,k,:))';
 
                     % Get linear model
-                    [DT_mat, exitcode] = linear_vox_fit(b0,dwi,bvecs,bvals);
-                    
+                    [DT_mat, exitcode] = linear_vox_fit(b0,dwi,bvecs,bvals); 
+%                     
+%                     Compute ADC at every volume
+%                      bvec_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/INPUTS/dwmri.bvec';
+%                     bval_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/INPUTS/dwmri.bval';
+%                     bvec = load(bvec_path);
+%                     bvec = bvec();
+%                     bval = load(bval_path);
+%                     nb = length(bval);
+%                     disp(size(bvec))
+%                     disp(size(bval))
+%                     bval(:,1) = [];
+%                     bvec(:,1) = [];  
+%                     for v = 1:length(bvals)
+%                          % compute the corrected signal with adjbvec and adjbval
+%                          og = bvec(:,v);
+%                          ob = bval(v);
+%                          est_dwi(i,j,k,v) =  b0_vol(i,j,k)*exp(-1*ob*og'*DT_mat(:,:)*og);
+%                          ADC = (log(est_dwi(i,j,k,v) / (b0_vol(i,j,k))) * (1 / (b0_vol(i,j,k) - bval(v))));
+%                         %fprintf('Sh %f\n',est_dwi(i,j,k,v));
+%                         %fprintf('So %f\n',b0_vol(i,j,k));
+%                         %fprintf('b %f\n', bval(v));
+%                          fprintf('ADC %f for volume %i\n',[ADC, v])
+%                       end
+                     
                     if sum(isnan(DT_mat(:))) == 0 && sum(isinf(DT_mat(:))) == 0
-                        DT_rot_lest_corr_bx_posB(:,:,i,j,k) = DT_mat(:,:);
+                        %DT_rot_lest_corr_bx_posB(:,:,i,j,k) = DT_mat(:,:);
                     	[v, e] = eig(DT_mat);
                     	e = diag(e);
                     	[max_eig, pos] = max(e);
@@ -81,7 +104,7 @@ function dti_voxel_fit(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_
             end
         end
     end
-    save('DT_rot_lest_corr_bx_posB.mat', 'DT_rot_lest_corr_bx_posB');
+    %save('DT_rot_lest_corr_bx_posB.mat', 'DT_rot_lest_corr_bx_posB');
     MD = (eig_vol(:,:,:,1) + eig_vol(:,:,:,2) + eig_vol(:,:,:,3))./3;
     FA = sqrt(1/2) .* (sqrt( (eig_vol(:,:,:,1) - eig_vol(:,:,:,2)).^2 + (eig_vol(:,:,:,2) - eig_vol(:,:,:,3)).^2  + (eig_vol(:,:,:,3) - eig_vol(:,:,:,1)).^2 ) ./ sqrt(eig_vol(:,:,:,1).^2 + eig_vol(:,:,:,2).^2 + eig_vol(:,:,:,3).^2));
     nii = load_untouch_nii(dwi_path);

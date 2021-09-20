@@ -58,6 +58,7 @@ vL(2,3,:) = L(:,6);
 vL(3,1,:) = L(:,7);
 vL(3,2,:) = L(:,8);
 vL(3,3,:) = L(:,9);
+%vp = reshape(vL,[3,3,size(spm_read_vols(VL),1),size(spm_read_vols(VL),2),size(spm_read_vols(VL),3)]);
 
 % Load B values and vectors
 bval = load(bval_file);
@@ -136,3 +137,4 @@ for b = 1:nb
 end
 
 system(['gzip -f ' rLimg_file]);
+

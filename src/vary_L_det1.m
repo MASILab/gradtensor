@@ -1,5 +1,5 @@
 %function sim_dt_FA_MD(MD,FA)
-function [L_det, vL] = vary_L_det()
+function [L_det, vL] = vary_L_det1()
 % for nifti_utils
 addpath('/nfs/masi/kanakap/masimatab/trunk/xnatspiders/matlab/justinlib_v1_7_0/niftilib/')
 % for load_untouch_header_only
@@ -21,33 +21,29 @@ mask_vol = logical(mask_vol);
 rLimg_file = fullfile(out_dir,'L_resamp.nii');
 VL = spm_vol(rLimg_file);
 L = spm_read_vols(VL);
-size_x = size(L,1);
-size_y = size(L,2);
-size_z = size(L,3);
-L = reshape(L,[],9);
+%L = reshape(L,[],9);
 nv = size(L,1);
-vL = zeros(3,3,nv);
-vL(1,1,:) = L(:,1);
-vL(1,2,:) = L(:,2);
-vL(1,3,:) = L(:,3);
-vL(2,1,:) = L(:,4);
-vL(2,2,:) = L(:,5);
-vL(2,3,:) = L(:,6);
-vL(3,1,:) = L(:,7);
-vL(3,2,:) = L(:,8);
-vL(3,3,:) = L(:,9);
-vL = reshape(vL,[3,3,size_x,size_y,size_z]);
-L_det = zeros(size_x,size_y,size_z);
+vL = zeros(3,3,size(L,1),size(L,2),size(L,3));
+vL(1,1,:,:,:) = L(:,:,:,1);
+vL(1,2,:,:,:) = L(:,:,:,2);
+vL(1,3,:,:,:) = L(:,:,:,3);
+vL(2,1,:,:,:) = L(:,:,:,4);
+vL(2,2,:,:,:) = L(:,:,:,5);
+vL(2,3,:,:,:) = L(:,:,:,6);
+vL(3,1,:,:,:) = L(:,:,:,7);
+vL(3,2,:,:,:) = L(:,:,:,8);
+vL(3,3,:,:,:) = L(:,:,:,9);
+L_det = zeros(size(L,1),size(L,2),size(L,3));
 %L_det = reshape(L_det,[],96*96*68);
 %L_det = zeros(size(1:96*96*68));
-for x = 1:size_x
-        for y = 1:size_y
-            for z = 1:size_z
-                %if mask_vol(x,y,z)
+for x = 1:size(L,1)
+        for y = 1:size(L,2)
+            for z = 1:size(L,3)
+                if mask_vol(x,y,z)
                     %dwmri_vols(x,y,z,i) = rot90(dwmri_vols(x,y,z,i));
                     L_mat = squeeze(vL(:,:,x,y,z));
                     L_det(x,y,z) = det(L_mat(:,:));
-                %end
+                end
             end
         end
 end
@@ -147,3 +143,4 @@ end
 end
 %end
 %}
+

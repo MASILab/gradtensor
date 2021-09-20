@@ -14,16 +14,16 @@ dwi_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repo
 bvec_folder = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/OUTPUTS_future_fieldmap/corrected_bvec/';
 bval_folder = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/OUTPUTS_future_fieldmap/corrected_bval/';
 mask_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/mask.nii';
-out_dir = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/ten_est/';
+out_dir = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/OUTPUTS_future_fieldmap/';
 
 %dwi_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/PVP_phantom/scans/3tb/posA/INPUTS/dwmri.nii';
 %bvec_folder = '/home/local/VANDERBILT/kanakap/gradtensor_data/PVP_phantom/scans/3tb/posA/OUTPUTS_future_fieldmap/corrected_bvec/';
 %bval_folder = '/home/local/VANDERBILT/kanakap/gradtensor_data/PVP_phantom/scans/3tb/posA/OUTPUTS_future_fieldmap/corrected_bval/';
 %mask_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/PVP_phantom/scans/3tb/posA/mask.nii';
 %out_dir = '/home/local/VANDERBILT/kanakap/gradtensor_data/PVP_phantom/scans/3tb/posA/corrupt_signal/';
-out_name = 'posA';
+out_name = 'posB_aug15';
 
-rL_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/PVP_phantom/scans/3tb/posA/OUTPUTS_future_fieldmap/L_resamp.nii';
+rL_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/PVP_phantom/scans/3tb/posB/OUTPUTS_future_fieldmap/L_resamp.nii';
 
 %gunzip(mask_path)
 %gunzip(rL_path)

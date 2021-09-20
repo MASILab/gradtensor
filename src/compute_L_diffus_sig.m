@@ -32,7 +32,7 @@ function compute_L_diffus_sig(dwi_path,bvec_folder,bval_folder,mask_path, out_di
     vL(3,1,:,:,:) = L(:,:,:,7);
     vL(3,2,:,:,:) = L(:,:,:,8);
     vL(3,3,:,:,:) = L(:,:,:,9);
-    save('L_mat','vL');
+    %save('L_mat','vL');
 
     % Exctract nii and create cell array of bvec nifti paths
     gunzip(fullfile(bvec_folder,'*.gz'))
@@ -76,9 +76,9 @@ function compute_L_diffus_sig(dwi_path,bvec_folder,bval_folder,mask_path, out_di
     eig_vol = zeros(size(b0_vol,1),size(b0_vol,2),size(b0_vol,3),3);
     primary_vec_vol = zeros(size(eig_vol)); 
     % diffus_sig = zeros(96,96,68,24,3);
-    est_dwi = zeros(size(dwi_vols));
-    Lest_dwi = zeros(size(dwi_vols));
-    DTp = zeros(3,3,size(dwi_vols,1),size(dwi_vols,2),size(dwi_vols,3));
+    %est_dwi = zeros(size(dwi_vols));
+    %Lest_dwi = zeros(size(dwi_vols));
+    %DTp = zeros(3,3,size(dwi_vols,1),size(dwi_vols,2),size(dwi_vols,3));
     % Cycle over and compute DT voxel-wise
     for i = 1:size(mask_vol,1)
         for j = 1:size(mask_vol,2)
@@ -108,13 +108,10 @@ function compute_L_diffus_sig(dwi_path,bvec_folder,bval_folder,mask_path, out_di
                         og = org_bvecs(:,v);
                         ob = org_bvals(v);
                         
-                        
                         %est_dwi(i,j,k,v) =  b0_vol(i,j,k)*exp(-1*ob*og'*R_DT_mat(:,:)*og);
                         
                         %here b and g need to be original uncorrected
                         %bvals, and bvecs
-                        
-                        	
                         % Most simply, the adjusted bvec is simply L * bvec. Here we are
                         % operating in the image space.
                         og(1) = -og(1);
@@ -138,9 +135,7 @@ function compute_L_diffus_sig(dwi_path,bvec_folder,bval_folder,mask_path, out_di
                         adjbvec(1) = -adjbvec(1);
                         
                         Lest_dwi(i,j,k,v) = b0_vol(i,j,k)*exp(-1*adjbval*adjbvec'*DT_mat(:,:)*adjbvec);
-                        disp(ob);
-                        disp(og);
-                        disp(Lest_dwi);
+                        
                         %above line -> Lest_dwi(i,j,k,v) = b0_vol(i,j,k)*exp(-1*ob*og'*L_mat(:,:)'*DT_mat(:,:)*L_mat(:,:)*og);
                     end
 
@@ -164,38 +159,38 @@ function compute_L_diffus_sig(dwi_path,bvec_folder,bval_folder,mask_path, out_di
     %save('DTp.mat', 'DTp');
   
     %plotDTI(DT);
-    %dwmri_est = zeros(size(dwmri_vols));
-    %dwmri_est(:,:,:,1) = b0_vol ;
-    %dwmri_est(:,:,:,2:end) = est_dwi ; 
-    %nii = load_untouch_nii(dwi_path);
-    %nii.img = dwmri_est;
-    %nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_est_sig']),nii,'double');
+    dwmri_est = zeros(size(dwmri_vols));
+    dwmri_est(:,:,:,1) = b0_vol ;
+    dwmri_est(:,:,:,2:end) = est_dwi ; 
+    nii = load_untouch_nii(dwi_path);
+    nii.img = dwmri_est;
+    nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_est_sig']),nii,'double');
     
-    %diff = abs(est_dwi - dwi_vols);
-    %nii.img = diff;
-    %nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_est_diff_sig']),nii,'double');
-    %noise = std(diff,0,4);
-    %snr = nanmean(est_dwi,4) ./ noise;
-    %nanmean(snr(mask_vol))
+    diff = abs(est_dwi - dwi_vols);
+    nii.img = diff;
+    nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_est_diff_sig']),nii,'double');
+    noise = std(diff,0,4);
+    snr = nanmean(est_dwi,4) ./ noise;
+    nanmean(snr(mask_vol))
 
-    %dwmri_Lest = zeros(size(dwmri_vols));
-    %dwmri_Lest(:,:,:,1) = b0_vol ;
-    %dwmri_Lest(:,:,:,2:end) = Lest_dwi ;
-    %nii.img = dwmri_Lest;
-    %nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Lest_sig']),nii,'double');
+    dwmri_Lest = zeros(size(dwmri_vols));
+    dwmri_Lest(:,:,:,1) = b0_vol ;
+    dwmri_Lest(:,:,:,2:end) = Lest_dwi ;
+    nii.img = dwmri_Lest;
+    nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Lest_sig']),nii,'double');
 
-    %Ldiff = abs(Lest_dwi - dwi_vols);
-    %nii.img = Ldiff;
-    %nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Lest_diff_sig']),nii,'double');
-    %Lnoise = std(Ldiff,0,4);
-    %snr = nanmean(est_dwi,4) ./ Lnoise;
-    %nanmean(snr(mask_vol))
+    Ldiff = abs(Lest_dwi - dwi_vols);
+    nii.img = Ldiff;
+    nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Lest_diff_sig']),nii,'double');
+    Lnoise = std(Ldiff,0,4);
+    snr = nanmean(est_dwi,4) ./ Lnoise;
+    nanmean(snr(mask_vol))
     
-    %Ldiff_est = abs(est_dwi - Lest_dwi);
-    %nii.img = Ldiff_est;
-    %nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_diff_sig']),nii,'double');
-    %Lnoise = std(Ldiff,0,4);
-    %snr = nanmean(est_dwi,4) ./ Lnoise;
-    %nanmean(snr(mask_vol))
+    Ldiff_est = abs(est_dwi - Lest_dwi);
+    nii.img = Ldiff_est;
+    nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_diff_sig']),nii,'double');
+    Lnoise = std(Ldiff,0,4);
+    snr = nanmean(est_dwi,4) ./ Lnoise;
+    nanmean(snr(mask_vol))
     
 end

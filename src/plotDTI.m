@@ -1,4 +1,4 @@
-function plotDTI(D,delta)
+function plotDTI(D,delta)%, color)
 %-fanDTasia ToolBox------------------------------------------------------------------
 % This Matlab script is part of the fanDTasia ToolBox: a Matlab library for Diffusion 
 % Weighted MRI (DW-MRI) Processing, Diffusion Tensor (DTI) Estimation, High-order 
@@ -46,6 +46,8 @@ function plotDTI(D,delta)
 % University of Florida, Gainesville, FL 32611, USA
 % abarmpou at cise dot ufl dot edu
 %------------------------------------------------------------------------------------
+%ax1 = axes;
+%ax2 = axes;
 if nargin==1
     delta=1;
 end
@@ -75,7 +77,10 @@ for i=1:nx
         end
         X=X+(i-1)*delta*2;
         Y=Y+(j-1)*delta*2;
-        h(i)=surf(X,Y,Z);
+        surf(X,Y,Z)%, 'FaceColor', color , 'FaceAlpha', 0.3)%, 'EdgeColor', 'none');
+        %hold on 
+        %plot3(X,Y,Z)
+        %surf(X,Y,Z, 'FaceAlpha', 0.5);
         %xlim([-1 .001]);
         %ylim([-1 .001]);
         %zlim([-1 .001]);
@@ -87,32 +92,39 @@ for i=1:nx
     end
 end
 axis equal;
-alpha 0.5;
-%disp(xlim);
-%disp(ylim);
-%disp(zlim);
-%xlim([1.0e-03 * -1   1.0e-03 * 1]);
+
+%xlim([1.0e-03 * -2   1.0e-03 * 2]);
 %xlim([-0.0021 0.0021]);
-%ylim([1.0e-03 * -0.8   1.0e-03 * 0.8]);
-%zlim([1.0e-03 * -0.8   1.0e-03 * 0.8]);
-%xlim([-0.0002 0.0002]);
-%ylim([-0.0002 0.0002]);
-%zlim([-0.0002 0.0002]);
+%ylim([1.0e-03 * -1.5   1.0e-03 * 1.5]);
+%zlim([1.0e-4 * -6.5   1.0e-04 * 6.5]);
+%xlim([-0.013 0.013]);
+%ylim([1.0e-03 * -0.5470 1.0e-03 * 0.5470]);
+%zlim([1.0e-03 * -0.5202   1.0e-03 * 0.5202]);
 %xlim([-7 7])
 %ylim([-0.03 0.03])
 %zlim([-0.06 0.06])
-%view([90 0]);
+%view([-154 -4]);
 set(gca,'GridLine','none');
 %set(gca,'xlimMode',[-1 0.003]);
 set(gca,'XTick');
 set(gca,'YTick');
 set(gca,'ZTick');
-%alpha 0.5
+alpha 0.3
 %shading interp
-%colormap([0.8 0.8 0.8])
+%colormap([0 0.57 0.57])
+colormap(BWR2)
 %lighting phong
+%light
 %light('Position',[0 0 1]);%,'Style','infinite','Color',[ 1.000 0.584 0.000]);
+xlabel('X');
+ylabel('Y');
+zlabel('Z');
+disp(xlim);
+disp(ylim);
+disp(zlim);
+axis off
 %hold on
+%grid on
 %fprintf(1,'\nIf you use plotDTI.m please cite the following work:\n');
 %fprintf(1,'A. Barmpoutis, B. C. Vemuri, T. M. Shepherd, and J. R. Forder "Tensor splines for\n');
 %fprintf(1,'interpolation and approximation of DT-MRI with applications to segmentation of\n');
