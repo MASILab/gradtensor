@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 uncorr_md_posA = nib.load('/home/local/VANDERBILT/kanakap/INPUTS/brain_posA_md.nii').get_fdata()
 uncorr_md_posB = nib.load('/home/local/VANDERBILT/kanakap/INPUTS/brain_posB_md.nii').get_fdata()
 
-corr_md_posA = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_future_fieldmap/p_3tb_posA_mask_md.nii').get_fdata()
-corr_md_posB = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/OUTPUTS_future_fieldmap/p_3tb_posB_mask_md.nii').get_fdata()
+corr_md_posA = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_simple_method_future_fieldmap/posA_corr_md.nii').get_fdata()
+corr_md_posB = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/OUTPUTS_simple_method_future_fieldmap/posB_corr_md.nii').get_fdata()
 
 slice_idx = 45 #maybe pick a middle slice
 slice = uncorr_md_posA[:,slice_idx,:]# get axial slice
@@ -15,7 +15,7 @@ slice = np.flip(np.rot90(slice,3)) #nibabel load the nifti weird so gotta flip a
 a = plt.figure()
 plt.subplot(2,3,1)
 plt.axis('off')
-m = -0
+m = 0
 M = 0.003 #this min and max needs to be set for each metric
 cmap = plt.get_cmap('viridis') #this is default but you can choose whatever
 plt.imshow(np.abs(slice), vmin=m, vmax=M, cmap=cmap)
@@ -43,7 +43,7 @@ cmap = plt.get_cmap('viridis') #this is default but you can choose whatever
 plt.imshow(np.abs(slice), vmin=m, vmax=M, cmap=cmap)
 
 m = 0
-M = 0.0001
+M = 0.0004
 diff_posA = uncorr_md_posA - corr_md_posA
 slice = diff_posA[:, slice_idx,:]
 slice = np.flip(np.rot90(slice,3)) #nibabel load the nifti weird so gotta flip and rotate
