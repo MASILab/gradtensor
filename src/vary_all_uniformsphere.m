@@ -6,23 +6,23 @@ nv = 19406;
 FA_sim_corpt_x = zeros(nv*n*n,1);
 FA_true_x = zeros(nv*n*n,1);
 % FA_sim_x = zeros(n*n*n,1);
-% FA_corr_bx_x = zeros(n*n*n,1);
-% FA_corr_sm_x = zeros(n*n*n,1);
-% FA_corr_sm_fy_x = zeros(n*n*n,1);
+FA_corr_bx_x = zeros(nv*n*n,1);
+%FA_corr_sm_x = zeros(n*n*n,1);
+FA_corr_sm_fy_x = zeros(nv*n*n,1);
 
 MD_sim_corpt_x = zeros(nv*n*n,1);
 MD_true_x = zeros(nv*n*n,1);
-% MD_sim_x = zeros(n*n*n,1);
-% MD_corr_bx_x = zeros(n*n*n,1);
-% MD_corr_sm_x = zeros(n*n*n,1);
-% MD_corr_sm_fy_x = zeros(n*n*n,1);
+%MD_sim_x = zeros(n*n*n,1);
+MD_corr_bx_x = zeros(nv*n*n,1);
+%MD_corr_sm_x = zeros(n*n*n,1);
+MD_corr_sm_fy_x = zeros(nv*n*n,1);
 
 PEV_sim_corpt_x = zeros(nv*n*n,3);
 PEV_true_x = zeros(nv*n*n,3);
 % PEV_sim_x = zeros(n*n*n,3);
-% PEV_corr_bx_x = zeros(n*n*n,3);
-% PEV_corr_sm_x = zeros(n*n*n,3);
-% PEV_corr_sm_fy_x = zeros(n*n*n,3);
+PEV_corr_bx_x = zeros(nv*n*n,3);
+%PEV_corr_sm_x = zeros(n*n*n,3);
+PEV_corr_sm_fy_x = zeros(nv*n*n,3);
 
 FA_all = zeros(1,nv*n*n);
 %phi_all = zeros(nv*n*n,1);
@@ -37,18 +37,13 @@ for i = 1:n
 end
 
 % rank-ordered expected LR field and selected 100 by choosing the first through 100th percentiles
-[L_det, vL] = vary_L_det_gm();
+[L_det, vL] = vary_L_det();
 A = L_det;
 blah = A(A>0);
 [out,index] = sort(blah,'ascend');
-% LR w gm
-indices_to_chose = round(linspace(1,81812,n));
-% LR w wm
-%indices_to_chose = round(linspace(1,1014,n));
 %LR w no mask
-%indices_to_chose = round(linspace(1,626688,n));
+indices_to_chose = round(linspace(1,626688,n));
 vec = out(indices_to_chose);
-%det_vals = zeros(1,n);
 locations = zeros(3,n);
 for k = 1:n
   [r,c,v] = ind2sub(size(A),find(A == vec(k)));
@@ -117,14 +112,14 @@ for i = 1:nv
                 PEV_sim_corpt_x(idx,:) =   PEV_sim_corpt;
 
                 % DT fit baxter corrected with adjected bvec and adjected bval
-%                 [D_corr_bx, exitcode] =  linear_vox_fit(1,S_corpt,abvec, abval);
+                 [D_corr_bx, exitcode] =  linear_vox_fit(1,S_corpt,abvec, abval);
 %                 % FA + MD + PVE baxter correction
-%                 FA_corr_bx = compute_FA(D_corr_bx);
-%                 FA_corr_bx_x(idx) =  FA_corr_bx;
-%                 MD_corr_bx = compute_MD(D_corr_bx);
-%                 MD_corr_bx_x(idx) =  MD_corr_bx;
-%                 PEV_corr_bx = compute_primary_eigvec(D_corr_bx);
-%                 PEV_corr_bx_x(idx,:) = PEV_corr_bx;
+                 FA_corr_bx = compute_FA(D_corr_bx);
+                 FA_corr_bx_x(idx) =  FA_corr_bx;
+                 MD_corr_bx = compute_MD(D_corr_bx);
+                 MD_corr_bx_x(idx) =  MD_corr_bx;
+                 PEV_corr_bx = compute_primary_eigvec(D_corr_bx);
+                 PEV_corr_bx_x(idx,:) = PEV_corr_bx;
 
                 % compute new signal with det + DT fit 
 %                 new_dwi_signal = correct_signal_sm(S_corpt,g,b,L_mat);
@@ -138,15 +133,15 @@ for i = 1:nv
 %                 PEV_corr_sm_x =  [PEV_corr_sm_x; PEV_corr_sm];
 
 %                 %compute new signal with scaling the bvec + DT fit
-%                 fy_new_dwi_signal = bl_correct_signal_sm(S_corpt,g,b,abvec,abval,L_mat);
-%                 [D_corr_sm_fy, exitcode] = linear_vox_fit(1,fy_new_dwi_signal,g, b);
+                 fy_new_dwi_signal = bl_correct_signal_sm(S_corpt,g,b,abvec,abval,L_mat);
+                 [D_corr_sm_fy, exitcode] = linear_vox_fit(1,fy_new_dwi_signal,g, b);
 %                 % FA + MD + PVE anisotropy method
-%                 FA_corr_sm_fy = compute_FA(D_corr_sm_fy);
-%                 FA_corr_sm_fy_x(idx) =   FA_corr_sm_fy;
-%                 MD_corr_sm_fy = compute_MD(D_corr_sm_fy);
-%                 MD_corr_sm_fy_x(idx) =   MD_corr_sm_fy;
-%                 PEV_corr_sm_fy = compute_primary_eigvec(D_corr_sm_fy);
-%                 PEV_corr_sm_fy_x(idx,:) =  PEV_corr_sm_fy;
+                 FA_corr_sm_fy = compute_FA(D_corr_sm_fy);
+                 FA_corr_sm_fy_x(idx) =   FA_corr_sm_fy;
+                 MD_corr_sm_fy = compute_MD(D_corr_sm_fy);
+                 MD_corr_sm_fy_x(idx) =   MD_corr_sm_fy;
+                 PEV_corr_sm_fy = compute_primary_eigvec(D_corr_sm_fy);
+                 PEV_corr_sm_fy_x(idx,:) =  PEV_corr_sm_fy;
 
                 % DT for simulate tensor without corpt % should be like my true
                 % tensor
@@ -159,8 +154,8 @@ for i = 1:nv
                 %disp(lala);
             end
         end
-    %end
 end
-save('LReffectsresults_gm.mat','-v7.3');
+save('CorrectionLReffectsresults2.mat','-v7.3');
+
 
 
