@@ -88,40 +88,24 @@ new_dwi_signal = zeros(size(dwi_vols));
 size(new_dwi_signal)
 
 for i = 1:24
-    %g = bvec(:,i);
-    %b = bval(i);
-
     for x = 1:size(dwi_vols,1)
         for y = 1:size(dwi_vols,2)
             for z = 1:size(dwi_vols,3)
                 if mask_vol(x,y,z)
-                    %dwmri_vols(x,y,z,i) = rot90(dwmri_vols(x,y,z,i);
+			% LR 
                         L_mat = squeeze(vL(:,:,x,y,z));
-
-                        og = bvec(:,i);
+			og = bvec(:,i);
                         ob = bval(i);
                         %og(1) = -og(1);
+
+			% adjus bvec by L*bvec and then compute the length change 
                         gg = L_mat * og;
-                        %disp(gg)
-                        %norm_gg = norm(gg);
                         norm_gg = sum(gg.^2);
-                        %inv_l2 = 1 / norm_gg;
-                        %disp(norm_gg)
-                        %fprintf('i = %i\n',i);
-                        %fprintf('norm_gg = %f\n',norm_gg);
-                        %fprintf('S = %f\n', dwi_vols(x,y,z,i));
-                        %new_dwi_signal(x,y,z,i) = dwi_vols(x,y,z,i)*exp(-1*adjbvec'*eye(3)*adjbvec);
-                        %disp(b0_vol(x,y,z));
-                        %disp(ob);
-                        new_dwi_signal(x,y,z,i) = (b0_vol(x,y,z)) * (exp( (log(dwi_vols(x,y,z,i)/b0_vol(x,y,z))) / norm_gg));
-                        %new_dwi_signal(x,y,z,i) = (b0_vol(x,y,z) ^ (1-inv_l2)) * ( dwi_vols(x,y,z,i)^inv_l2 );
-                        %fprintf('Sh %f\n',new_dwi_signal(x,y,z,i));
-                        %fprintf('So %f\n',b0_vol(x,y,z));
-                        %fprintf('b %f\n', ob);
+                        
+			% compute the new signal with length change 
+			new_dwi_signal(x,y,z,i) = (b0_vol(x,y,z)) * (exp( (log(dwi_vols(x,y,z,i)/b0_vol(x,y,z))) / norm_gg));
                         ADC = log(new_dwi_signal(x,y,z,i) / (b0_vol(x,y,z))) * (1 / (b0_vol(x,y,z) - ob));
-                        %ADC = -1 * log(dwi_vols(x,y,z,i)) / ob  ;
                         fprintf('ADC %f for volume %i\n', [ADC, i]);
-                        %fprintf('Sh = %f\n', new_dwi_signal(x,y,z,i));
                 end
             end
         end
