@@ -91,21 +91,21 @@ for i = 1:24
     %g = bvec(:,i);
     %b = bval(i);
 
-    for x = 58 %1:size(dwi_vols,1)
-        for y = 52 %1:size(dwi_vols,2)
-            for z = 41 %1:size(dwi_vols,3)
+    for x = 1:size(dwi_vols,1)
+        for y = 1:size(dwi_vols,2)
+            for z = 1:size(dwi_vols,3)
                 if mask_vol(x,y,z)
                     %dwmri_vols(x,y,z,i) = rot90(dwmri_vols(x,y,z,i);
                         L_mat = squeeze(vL(:,:,x,y,z));
 
                         og = bvec(:,i);
                         ob = bval(i);
-                        og(1) = -og(1);
+                        %og(1) = -og(1);
                         gg = L_mat * og;
                         %disp(gg)
                         %norm_gg = norm(gg);
                         norm_gg = sum(gg.^2);
-                        inv_l2 = 1 / norm_gg;
+                        %inv_l2 = 1 / norm_gg;
                         %disp(norm_gg)
                         %fprintf('i = %i\n',i);
                         %fprintf('norm_gg = %f\n',norm_gg);
