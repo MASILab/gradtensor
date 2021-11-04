@@ -96,7 +96,7 @@ for i = 1:24
                         L_mat = squeeze(vL(:,:,x,y,z));
 			og = bvec(:,i);
                         ob = bval(i);
-                        %og(1) = -og(1);
+                        og(1) = -og(1);
 
 			% adjus bvec by L*bvec and then compute the length change 
                         gg = L_mat * og;
@@ -113,7 +113,7 @@ for i = 1:24
 end
 
 size(new_dwi_signal)
-out_name = 'Lest';
+out_name = 'Lest_imagespace';
 corrected_signal = zeros(size(dwmri_vols));
 corrected_signal(:,:,:,1) = b0_vol ;
 corrected_signal(:,:,:,2:end) = new_dwi_signal ;

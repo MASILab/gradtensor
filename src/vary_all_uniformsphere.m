@@ -30,7 +30,7 @@ FA_all = zeros(1,nv*n*n);
 Ldet_all = zeros(nv*n*n,1);
 
 % generate evenly distributed FA
-FA = linspace(0,1,n);
+FA = linspace(0.01,1,n);
 %lprep = zeros(1,n);
 for i = 1:n
    lprep(i) = MD * (1 - FA(i)/ (3-2*FA(i)^2)^(1/2));
@@ -155,7 +155,7 @@ for i = 1:nv
             end
         end
 end
-save('CorrectionLReffectsresults2.mat','-v7.3');
+save('CorrectionLReffectsresults4.mat','-v7.3');
 
 
 
