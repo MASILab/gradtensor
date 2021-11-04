@@ -1,6 +1,6 @@
-function compute_L_diffus_sig(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_name, rL_path)
-    % Performs linear DTI fit given input bfields. Note that only symmetric 
-    % constraint is applied. Positive definiteness is not enforced. 
+function compute_L_diffus_sig(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_name, rL_path, org_bvec_path, org_bval_path)
+    % Computes signal with LR induced in it 
+    % 
     %
     % INPUTS:
     %   dwi_path is the path to the diffusion weighted nifti. Assumes b0 at
@@ -11,6 +11,8 @@ function compute_L_diffus_sig(dwi_path,bvec_folder,bval_folder,mask_path, out_di
     %   out_dir is a path to a directory in which to save metrics
     %   out_name is a prefix to the generated metric nifti filenames
     %   rL_path resampled L
+    %   org_bvec_path orignial dwmri bvec
+    % 	org_bvec_path original dwmri bval
     
     % Load data
     dwmri_vols = nifti_utils.load_untouch_nii4D_vol_scaled(dwi_path,'double');
@@ -64,8 +66,6 @@ function compute_L_diffus_sig(dwi_path,bvec_folder,bval_folder,mask_path, out_di
     bvec_vols = bvec_vols(:,:,:,2:end,:);
     bval_vols = bval_vols(:,:,:,2:end);
     
-    org_bvec_path = '/home-nfs2/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/INPUTS/dwmri.bvec';
-    org_bval_path = '/home-nfs2/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/INPUTS/dwmri.bval';
     org_bvecs = importdata(org_bvec_path);
     org_bvals = importdata(org_bval_path);
     org_bvecs = org_bvecs(:,2:end);
@@ -75,9 +75,9 @@ function compute_L_diffus_sig(dwi_path,bvec_folder,bval_folder,mask_path, out_di
     exitcode_vol = zeros(size(b0_vol));
     eig_vol = zeros(size(b0_vol,1),size(b0_vol,2),size(b0_vol,3),3);
     primary_vec_vol = zeros(size(eig_vol)); 
-    % diffus_sig = zeros(96,96,68,24,3);
-    %est_dwi = zeros(size(dwi_vols));
-    %Lest_dwi = zeros(size(dwi_vols));
+    %diffus_sig = zeros(96,96,68,24,3);
+    est_dwi = zeros(size(dwi_vols));
+    Lest_dwi = zeros(size(dwi_vols));
     %DTp = zeros(3,3,size(dwi_vols,1),size(dwi_vols,2),size(dwi_vols,3));
     % Cycle over and compute DT voxel-wise
     for i = 1:size(mask_vol,1)
@@ -92,15 +92,12 @@ function compute_L_diffus_sig(dwi_path,bvec_folder,bval_folder,mask_path, out_di
                     bvals = squeeze(bval_vols(i,j,k,:))';
                     L_mat = squeeze(vL(:,:,i,j,k));
 
-                    % Get linear model
+                    % Get linear model - use the corrected bvec and bval - considered as ground 
+                     % truth tensor
                     [DT_mat, exitcode] = linear_vox_fit(b0,dwi,bvecs,bvals);
                     %[DT_mat, exitcode] = linear_vox_fit(b0,dwi,org_bvecs,org_bvals);
-                    %R = rotx(15);
-                    %R_DT_mat(:,:) = R * DT_mat(:,:) * R';
-                    %direction = [1 0 0];
-                    %alpha = 15;
-                    %R_DT_mat(:,:) = rotate(DT_mat(:,:),direction,alpha);
-                    
+                   
+                     % Induce Corrput with baxtars code and signal equation
                     for v = 1:length(bvals)
                         g = bvecs(:,v);
                         b = bvals(v);
@@ -108,14 +105,14 @@ function compute_L_diffus_sig(dwi_path,bvec_folder,bval_folder,mask_path, out_di
                         og = org_bvecs(:,v);
                         ob = org_bvals(v);
                         
-                        %est_dwi(i,j,k,v) =  b0_vol(i,j,k)*exp(-1*ob*og'*R_DT_mat(:,:)*og);
+                        % DWI signal with no corput
+                        est_dwi(i,j,k,v) =  b0_vol(i,j,k)*exp(-1*ob*og'*DT_mat(:,:)*og);
                         
                         %here b and g need to be original uncorrected
                         %bvals, and bvecs
                         % Most simply, the adjusted bvec is simply L * bvec. Here we are
                         % operating in the image space.
-                        og(1) = -og(1);
-                        %disp(L_mat);
+                        %og(1) = -og(1);
                         ab = L_mat * og;
 
                         % The bvecs were length 1 before adjustment, so now compute the length
@@ -132,7 +129,7 @@ function compute_L_diffus_sig(dwi_path,bvec_folder,bval_folder,mask_path, out_di
                         ab(:,lenkeeps) = ab(:,lenkeeps) ./ repmat(len(lenkeeps),3,1);
                         adjbvec = ab;
                         
-                        adjbvec(1) = -adjbvec(1);
+                        %adjbvec(1) = -adjbvec(1);
                         
                         Lest_dwi(i,j,k,v) = b0_vol(i,j,k)*exp(-1*adjbval*adjbvec'*DT_mat(:,:)*adjbvec);
                         
@@ -168,7 +165,7 @@ function compute_L_diffus_sig(dwi_path,bvec_folder,bval_folder,mask_path, out_di
     
     diff = abs(est_dwi - dwi_vols);
     nii.img = diff;
-    nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_est_diff_sig']),nii,'double');
+    nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_est_org_diff']),nii,'double');
     noise = std(diff,0,4);
     snr = nanmean(est_dwi,4) ./ noise;
     nanmean(snr(mask_vol))
@@ -181,14 +178,14 @@ function compute_L_diffus_sig(dwi_path,bvec_folder,bval_folder,mask_path, out_di
 
     Ldiff = abs(Lest_dwi - dwi_vols);
     nii.img = Ldiff;
-    nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Lest_diff_sig']),nii,'double');
+    nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Lest_org_diff']),nii,'double');
     Lnoise = std(Ldiff,0,4);
     snr = nanmean(est_dwi,4) ./ Lnoise;
     nanmean(snr(mask_vol))
     
     Ldiff_est = abs(est_dwi - Lest_dwi);
     nii.img = Ldiff_est;
-    nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_diff_sig']),nii,'double');
+    nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Lest_est_diff']),nii,'double');
     Lnoise = std(Ldiff,0,4);
     snr = nanmean(est_dwi,4) ./ Lnoise;
     nanmean(snr(mask_vol))
