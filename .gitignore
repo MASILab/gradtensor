@@ -3,3 +3,6 @@ OUTPUTS*
 local*
 *~
 *.simg
+src/*.mat
+src/*.png
+src/*.zip
