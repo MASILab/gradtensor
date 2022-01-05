@@ -1,0 +1,103 @@
+ADC no corpt 0.001086 for volume 1
+ADC corpt 0.000991 for volume 1
+ADC no corpt 0.000751 for volume 2
+ADC corpt 0.000831 for volume 2
+ADC no corpt 0.000749 for volume 3
+ADC corpt 0.001000 for volume 3
+ADC no corpt 0.000742 for volume 4
+ADC corpt 0.001251 for volume 4
+ADC no corpt 0.000738 for volume 5
+ADC corpt 0.000690 for volume 5
+ADC no corpt 0.000734 for volume 6
+ADC corpt 0.001007 for volume 6
+ADC no corpt 0.001085 for volume 7
+ADC corpt 0.000999 for volume 7
+ADC no corpt 0.000737 for volume 8
+ADC corpt 0.000711 for volume 8
+ADC no corpt 0.000732 for volume 9
+ADC corpt 0.001286 for volume 9
+ADC no corpt 0.000751 for volume 10
+ADC corpt 0.000883 for volume 10
+ADC no corpt 0.000742 for volume 11
+ADC corpt 0.000984 for volume 11
+ADC no corpt 0.000753 for volume 12
+ADC corpt 0.000905 for volume 12
+ADC no corpt 0.001085 for volume 13
+ADC corpt 0.000988 for volume 13
+ADC no corpt 0.000753 for volume 14
+ADC corpt 0.000832 for volume 14
+ADC no corpt 0.000747 for volume 15
+ADC corpt 0.001003 for volume 15
+ADC no corpt 0.000744 for volume 16
+ADC corpt 0.001254 for volume 16
+ADC no corpt 0.000736 for volume 17
+ADC corpt 0.000692 for volume 17
+ADC no corpt 0.000734 for volume 18
+ADC corpt 0.001002 for volume 18
+ADC no corpt 0.001086 for volume 19
+ADC corpt 0.000996 for volume 19
+ADC no corpt 0.000736 for volume 20
+ADC corpt 0.000709 for volume 20
+ADC no corpt 0.000735 for volume 21
+ADC corpt 0.001285 for volume 21
+ADC no corpt 0.000747 for volume 22
+ADC corpt 0.000887 for volume 22
+ADC no corpt 0.000745 for volume 23
+ADC corpt 0.000987 for volume 23
+ADC no corpt 0.000753 for volume 24
+ADC corpt 0.000906 for volume 24
+ADC full corr 0.001086 for volume 1
+ADC full corr 0.000751 for volume 2
+ADC full corr 0.000749 for volume 3
+ADC full corr 0.000742 for volume 4
+ADC full corr 0.000738 for volume 5
+ADC full corr 0.000734 for volume 6
+ADC full corr 0.001085 for volume 7
+ADC full corr 0.000737 for volume 8
+ADC full corr 0.000732 for volume 9
+ADC full corr 0.000751 for volume 10
+ADC full corr 0.000742 for volume 11
+ADC full corr 0.000753 for volume 12
+ADC full corr 0.001085 for volume 13
+ADC full corr 0.000753 for volume 14
+ADC full corr 0.000747 for volume 15
+ADC full corr 0.000744 for volume 16
+ADC full corr 0.000736 for volume 17
+ADC full corr 0.000734 for volume 18
+ADC full corr 0.001086 for volume 19
+ADC full corr 0.000736 for volume 20
+ADC full corr 0.000735 for volume 21
+ADC full corr 0.000747 for volume 22
+ADC full corr 0.000745 for volume 23
+ADC full corr 0.000753 for volume 24
+ADC simple corr 0.001079 for volume 1
+ADC simple corr 0.000500 for volume 2
+ADC simple corr 0.001067 for volume 3
+ADC simple corr 0.000828 for volume 4
+ADC simple corr 0.000490 for volume 5
+ADC simple corr 0.000885 for volume 6
+ADC simple corr 0.001077 for volume 7
+ADC simple corr 0.000521 for volume 8
+ADC simple corr 0.001122 for volume 9
+ADC simple corr 0.000793 for volume 10
+ADC simple corr 0.000539 for volume 11
+ADC simple corr 0.000759 for volume 12
+ADC simple corr 0.001080 for volume 13
+ADC simple corr 0.000502 for volume 14
+ADC simple corr 0.001067 for volume 15
+ADC simple corr 0.000832 for volume 16
+ADC simple corr 0.000490 for volume 17
+ADC simple corr 0.000879 for volume 18
+ADC simple corr 0.001078 for volume 19
+ADC simple corr 0.000517 for volume 20
+ADC simple corr 0.001123 for volume 21
+ADC simple corr 0.000791 for volume 22
+ADC simple corr 0.000542 for volume 23
+ADC simple corr 0.000760 for volume 24
+    0.0259    0.0002    0.9997
+
+   -0.4206   -0.7308    0.5376
+
+    0.0259    0.0002    0.9997
+
+   -0.4444   -0.4324    0.7846

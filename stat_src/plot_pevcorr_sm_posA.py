@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-MD_Lest = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/ISMRM_sm/Lest_corr_sm_primary_eigvec.nii').get_fdata()
+MD_Lest = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/ISMRM_sm_noflip/Lest_corr_sm_primary_eigvec.nii').get_fdata()
 MD_true = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/OUTPUTS_future_fieldmap/p_3tb_posB_mask_primary_eigvec.nii').get_fdata()
 #MD_true = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/INPUTS/brain_posB_fa.nii').get_fdata()
 plt.figure()
@@ -56,8 +56,8 @@ a = plt.colorbar(im, cax=ax)
 
 diff_uncorr = angular_error(MD_Lest,MD_true,halfPi=True)
 slice = diff_uncorr[slice_idx,:,:]
-m = slice.min()
-M = slice.max()
+m = 0
+M = 5
 slice = np.flip(np.rot90(slice,3))
 slice = np.nan_to_num(slice)
 plt.subplot(1,3,3)

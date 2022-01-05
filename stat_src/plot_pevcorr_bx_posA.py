@@ -57,7 +57,7 @@ a = plt.colorbar(im, cax=ax)
 diff_uncorr = angular_error(MD_Lest,MD_true,halfPi=True)
 slice = diff_uncorr[slice_idx,:,:]
 m = 0
-M = 60
+M = 5
 slice = np.flip(np.rot90(slice,3))
 slice = np.nan_to_num(slice)
 plt.subplot(1,3,3)

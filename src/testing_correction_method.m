@@ -1,0 +1,21 @@
+fprintf('theta %f\n', theta)
+fprintf('phi %f\n', phi)
+disp('Ground truth tensor')
+fprintf('FA %f\n', FA_true_x)
+fprintf('MD %f\n', MD_true_x)
+fprintf('PEV %f %f %f\n', [PEV_true_x(1),PEV_true_x(2),PEV_true_x(3)])
+
+disp('Corrupted tensor')
+fprintf('FA %f\n', FA_sim_corpt_x)
+fprintf('MD %f\n', MD_sim_corpt_x)
+fprintf('PEV %f %f %f\n', [PEV_sim_corpt_x(1),PEV_sim_corpt_x(2),PEV_sim_corpt_x(3)])
+
+disp('Corrected tensor - FULL correction meth')
+fprintf('FA %f\n', FA_corr_bx_x)
+fprintf('MD %f\n', MD_corr_bx_x)
+fprintf('PEV %f %f %f\n', [PEV_corr_bx_x(1),PEV_corr_bx_x(2),PEV_corr_bx_x(3)])
+
+disp('Corrected tensor - PARTIAL correction meth')
+fprintf('FA %f\n', FA_corr_sm_fy_x)
+fprintf('MD %f\n', MD_corr_sm_fy_x)
+fprintf('PEV %f %f %f\n', [PEV_corr_sm_fy_x(1),PEV_corr_sm_fy_x(2),PEV_corr_sm_fy_x(3)])

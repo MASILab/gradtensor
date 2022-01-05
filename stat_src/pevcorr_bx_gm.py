@@ -8,12 +8,29 @@ import xml.etree.cElementTree as et
 import pandas as pd
 import scipy.io as sio
 
-MD_Lest = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_estimates/Lest_md.nii').get_fdata()
-MD_true = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_future_fieldmap/p_3tb_posA_mask_md.nii').get_fdata()
+MD_Lest = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/ISMRM_bx/Lest_corr_bx_primary_eigvec.nii').get_fdata()
+MD_true = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_future_fieldmap/p_3tb_posA_mask_primary_eigvec.nii').get_fdata()
 atlas_img = nib.load('/home-nfs2/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/slantatlas2subj.nii.gz')
 atlas = atlas_img.get_fdata()
 LR = sio.loadmat('../src/LRfield_posA.mat')
 vL = LR['vL']
+
+def angular_error(PEa, PEb, halfPi=True):
+    # PEa = preprocessing.normalize(PEa, norm='l1', axis=1)
+    # PEb = preprocessing.normalize(PEb, norm='l1', axis=1)
+    chord = np.square(PEa[..., 0] - PEb[..., 0]) + \
+            np.square(PEa[..., 1] - PEb[..., 1]) + \
+            np.square(PEa[..., 2] - PEb[..., 2])
+    chord = np.sqrt(chord)
+
+    ang = 2 * np.real(np.arcsin(chord/2))
+
+    if halfPi:
+        ang[ang > (np.pi/2)] = np.pi - ang[ang > (np.pi/2)]
+
+    return np.degrees(ang)
+
+ang_error = angular_error(MD_Lest,MD_true,halfPi=True)
 
 MD_diff = {}
 alltrue = []
@@ -26,7 +43,7 @@ for i in range(1,208):
         for y in range(96):
             for z in range(68):
                  if atlas[x,y,z] == i:
-                     diff = (MD_Lest[x,y,z] - MD_true[x,y,z])
+                     diff = ang_error[x,y,z]
                      alldiff.append(diff)
                      alltrue.append(MD_true[x,y,z])
                      allalldiff.append(diff)
@@ -39,7 +56,7 @@ for i in range(1,208):
         alldiff = []
         allL_det[i] = L_det_roi
         L_det_roi=[]
-print(np.nanmean(allalldiff))
+
 # get the avg of MD diff and change the label no to that
 avg_md_diff_labels = {}
 for k,v in MD_diff.items():
@@ -49,7 +66,7 @@ MD_diff_atlas = atlas.copy()
 MD_diff_atlas[MD_diff_atlas == 0.0] = np.nan
 for i in avg_md_diff_labels.keys():
     MD_diff_atlas[MD_diff_atlas == i] = avg_md_diff_labels[i]
-nib.save(nib.Nifti1Image(MD_diff_atlas,atlas_img.affine),'/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/ISMRM_corpt/MDdiff_avg_gmlabels.nii.gz')
+nib.save(nib.Nifti1Image(MD_diff_atlas,atlas_img.affine),'/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/ISMRM_bx/pevdiff_avg_gmlabels.nii.gz')
 
 # change key to roi names
 filename = '/nfs/masi/hansencb/10_29_2019_human_repositioned/3tb/posA/slant/OUTPUTS/FinalVolTxt/T1_label_volumes.txt'
@@ -86,22 +103,24 @@ df_sorted=df[sorted_index]
 fig1 = plt.figure(num=1,figsize=(40,40))
 ax = sns.boxplot(data=df_sorted)
 ax.set_xticklabels(ax.get_xticklabels(),rotation=90)
-plt.ylabel('∆ MD mm2/s')
+plt.ylabel('∆ PEV degree')
+#plt.ylim([-0.00025,0.00010])
 plt.subplots_adjust(left=0.045, bottom=0.385, right=0.995, top=0.955, wspace=0, hspace=0)
 #plt.xticks(range(1, len(labels) + 1), labels, rotation=90)
-plt.title('Corruption of GM regions of MR scan at isocenter')
+plt.title('Full Correction of GM regions of MR scan at isocenter')
 
 fig2 = plt.figure(num=2,figsize=(40,40))
 df_md_ldet = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in sorted_MDdiff_Ldet.items() ]))
 #md_ldet_labels = list(df_md_ldet.columns)
 ax = sns.boxplot(data=df_md_ldet)
 ax.set_xticklabels(ax.get_xticklabels(),rotation=90)
-plt.ylabel('∆ MD mm2/s')
+plt.ylabel('∆ PEV degrees')
+#plt.ylim([-0.00025,0.00010])
 plt.subplots_adjust(left=0.045, bottom=0.385, right=0.995, top=0.955, wspace=0, hspace=0)
 #plt.yticks(range(1, len(md_ldet_labels) + 1), md_ldet_labels)
 #plt.yticks(md_ldet_labels)
 
-plt.title('Corruption of GM regions of MR scan at isocenter - sorted by LRfield')
+plt.title('Full Correction of GM regions of MR scan at isocenter - sorted by LRfield')
 plt.show()
 
 

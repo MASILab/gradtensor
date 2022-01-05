@@ -69,9 +69,9 @@ nb = length(bval);
 % are always LAS while NII header world coords are always RAS.
 %    https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FDT/FAQ#What_conventions_do_the_bvecs_use.3F
 %    http://www.mrtrix.org/2016/04/15/bug-in-fsl-bvecs-handling/
-disp('Simulated data so no Flipping bvec X (LAS to RAS)')
-%bvec(1,:) = -bvec(1,:);
-%flipbvecs = true;
+disp('Flipping bvec X (LAS to RAS)')
+bvec(1,:) = -bvec(1,:);
+flipbvecs = true;
 
 
 % Adjust bvalues and bvectors
@@ -102,9 +102,9 @@ for v = 1:nv
 end
 
 % Flip the bvec X back if we need to
-%if flipbvecs
-%	adjbvec(:,1,:) = -adjbvec(:,1,:);
-%end
+if flipbvecs
+	adjbvec(:,1,:) = -adjbvec(:,1,:);
+end
 
 % Save bvec image to file
 adjbvec_files = [];

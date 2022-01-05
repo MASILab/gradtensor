@@ -1,3 +1,5 @@
+# Extract and save the white matter ROI from slant
+
 import nibabel as nib
 import numpy as np
 img = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/slant_T1_seg.nii.gz')

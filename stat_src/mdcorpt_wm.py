@@ -8,7 +8,7 @@ import xml.etree.cElementTree as et
 import pandas as pd
 import scipy.io as sio
 
-MD_Lest = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_estimates/Lest_md.nii').get_fdata()
+MD_Lest = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_estimates_noflip/Lest_md.nii').get_fdata()
 #MD_Lest = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/ISMRM_sm/posA_Lest_md.nii').get_fdata()
 MD_true = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_future_fieldmap/p_3tb_posA_mask_md.nii').get_fdata()
 atlas_img = nib.load('/home-nfs2/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/reg/FAatlas2subj.nii.gz')
@@ -28,7 +28,7 @@ for i in range(1,51):
         for y in range(96):
             for z in range(68):
                  if atlas[x,y,z] == i:
-                     diff = MD_Lest[x,y,z] - MD_true[x,y,z]
+                     diff = (MD_Lest[x,y,z] - MD_true[x,y,z])
                      alldiff.append(diff)
                      alltrue.append(MD_true[x,y,z])
                      allalldiff.append(diff)
@@ -41,7 +41,7 @@ for i in range(1,51):
     alldiff = []
     allL_det[i] = L_det_roi
     L_det_roi=[]
-
+print(np.nanmean(allalldiff))
 # get the avg of MD diff and change the label no to that
 avg_md_diff_labels = {}
 for k,v in MD_diff.items():
@@ -75,7 +75,7 @@ sorted_index = df.median().sort_values().index
 df_sorted=df[sorted_index]
 
 med_labels = list(df_sorted.columns)
-plt.figure(num=1,figsize(40,40))
+plt.figure(num=1,figsize=(40,40))
 sns.boxplot(data=df_sorted, orient="h")
 plt.xlabel('∆ MD')
 #plt.yticks(range(1, len(med_labels) + 1), med_labels)
@@ -83,7 +83,7 @@ plt.xlabel('∆ MD')
 plt.title('Corruption of WM regions of MR scan at isocenter')
 plt.subplots_adjust(left=0.445, bottom=0.065, right=0.985, top=0.950, wspace=0, hspace=0)
 
-plt.figure(num=2,figsize(40,40))
+plt.figure(num=2,figsize=(40,40))
 df_md_ldet = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in sorted_MDdiff_Ldet.items() ]))
 md_ldet_labels = list(df_md_ldet.columns)
 sns.boxplot(data=df_md_ldet, orient="h")

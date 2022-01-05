@@ -1,5 +1,6 @@
 
 function h = BWR2(m)
+% colormap script used for white is middle m/2
 % red-white-blue color map
 %   BWR2(M) returns an M-by-3 matrix containing the colormap.
 %   BWR2, by itself, is the same length as the current figure's

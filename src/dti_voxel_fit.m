@@ -1,16 +1,14 @@
 function dti_voxel_fit(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_name)
-    % Performs linear DTI fit given input bfields. Note that only symmetric 
+    % dti_voxel_fit Performs linear DTI fit given input bfields. Note that only symmetric 
     % constraint is applied. Positive definiteness is not enforced. 
     %
-    % INPUTS:
-    %   dwi_path is the path to the diffusion weighted nifti. Assumes b0 at
-    %       first volume
-    %   bvec_paths is a cell array of paths to bvec niftis. Assumes these
-    %       are with respect to voxels.
-    %   bval_paths is a cell array of paths to bval niftis.
-    %   mask_path is an optional path to mask nifti.
-    %   out_dir is a path to a directory in which to save metrics
-    %   out_name is a prefix to the generated metric nifti filenames
+    % Inputs
+    %   dwi_path 	Path to the diffusion weighted nifti. Assumes b0 at first volume
+    %   bvec_paths 	Cell array of paths to bvec niftis. Assumes these are with respect to voxels.
+    %   bval_paths 	Ccell array of paths to bval niftis.
+    %   mask_path 	Optional path to mask nifti.
+    %   out_dir 	Path to a directory in which to save metrics
+    %   out_name 	Prefix to the generated metric nifti filenames
     
     % Load data
     dwi_vols = nifti_utils.load_untouch_nii4D_vol_scaled(dwi_path,'double');
@@ -51,11 +49,11 @@ function dti_voxel_fit(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_
     exitcode_vol = zeros(size(b0_vol));
     eig_vol = zeros(size(b0_vol,1),size(b0_vol,2),size(b0_vol,3),3);
     primary_vec_vol = zeros(size(eig_vol)); 
-    %DT_rot_lest_corr_bx_posB = zeros(3,3,size(dwi_vols,1),size(dwi_vols,2),size(dwi_vols,3));
+
     % Cycle over and compute DT voxel-wise
-    for i = 58%1:size(mask_vol,1)
-        for j = 52%1:size(mask_vol,2)
-            for k = 41%1:size(mask_vol,3)
+    for i = 1:size(mask_vol,1)
+        for j = 1:size(mask_vol,2)
+            for k = 1:size(mask_vol,3)
                 if mask_vol(i,j,k)
                     % Get b0, dwi, bvecs and bvals
                     b0 = b0_vol(i,j,k);
@@ -65,29 +63,6 @@ function dti_voxel_fit(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_
 
                     % Get linear model
                     [DT_mat, exitcode] = linear_vox_fit(b0,dwi,bvecs,bvals); 
-%                     
-%                     Compute ADC at every volume
-%                      bvec_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/INPUTS/dwmri.bvec';
-%                     bval_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posB/INPUTS/dwmri.bval';
-%                     bvec = load(bvec_path);
-%                     bvec = bvec();
-%                     bval = load(bval_path);
-%                     nb = length(bval);
-%                     disp(size(bvec))
-%                     disp(size(bval))
-%                     bval(:,1) = [];
-%                     bvec(:,1) = [];  
-%                     for v = 1:length(bvals)
-%                          % compute the corrected signal with adjbvec and adjbval
-%                          og = bvec(:,v);
-%                          ob = bval(v);
-%                          est_dwi(i,j,k,v) =  b0_vol(i,j,k)*exp(-1*ob*og'*DT_mat(:,:)*og);
-%                          ADC = (log(est_dwi(i,j,k,v) / (b0_vol(i,j,k))) * (1 / (b0_vol(i,j,k) - bval(v))));
-%                         %fprintf('Sh %f\n',est_dwi(i,j,k,v));
-%                         %fprintf('So %f\n',b0_vol(i,j,k));
-%                         %fprintf('b %f\n', bval(v));
-%                          fprintf('ADC %f for volume %i\n',[ADC, v])
-%                       end
                      
                     if sum(isnan(DT_mat(:))) == 0 && sum(isinf(DT_mat(:))) == 0
                         %DT_rot_lest_corr_bx_posB(:,:,i,j,k) = DT_mat(:,:);
@@ -97,14 +72,15 @@ function dti_voxel_fit(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_
                     	primary = v(:,pos);
 						
                     	eig_vol(i,j,k,:) = e;
-						primary_vec_vol(i,j,k,:) = primary;
+			primary_vec_vol(i,j,k,:) = primary;
                         exitcode_vol(i,j,k) = exitcode;
                     end
                 end
             end
         end
     end
-    %save('DT_rot_lest_corr_bx_posB.mat', 'DT_rot_lest_corr_bx_posB');
+
+    % Compute and save the MD, FA, PEV of the DTI
     MD = (eig_vol(:,:,:,1) + eig_vol(:,:,:,2) + eig_vol(:,:,:,3))./3;
     FA = sqrt(1/2) .* (sqrt( (eig_vol(:,:,:,1) - eig_vol(:,:,:,2)).^2 + (eig_vol(:,:,:,2) - eig_vol(:,:,:,3)).^2  + (eig_vol(:,:,:,3) - eig_vol(:,:,:,1)).^2 ) ./ sqrt(eig_vol(:,:,:,1).^2 + eig_vol(:,:,:,2).^2 + eig_vol(:,:,:,3).^2));
     nii = load_untouch_nii(dwi_path);
@@ -114,5 +90,6 @@ function dti_voxel_fit(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_
     nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_fa']),nii,'double');
     nii.img = primary_vec_vol;
     nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_primary_eigvec']),nii,'double');
+    
     
 end

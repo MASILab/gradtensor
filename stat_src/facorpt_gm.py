@@ -26,7 +26,7 @@ for i in range(1,208):
         for y in range(96):
             for z in range(68):
                  if atlas[x,y,z] == i:
-                     diff = MD_Lest[x,y,z] - MD_true[x,y,z]
+                     diff = (MD_Lest[x,y,z] - MD_true[x,y,z])
                      alldiff.append(diff)
                      alltrue.append(MD_true[x,y,z])
                      allalldiff.append(diff)
@@ -39,7 +39,7 @@ for i in range(1,208):
         alldiff = []
         allL_det[i] = L_det_roi
         L_det_roi=[]
-
+print(np.nanmean(allalldiff))
 # get the avg of MD diff and change the label no to that
 avg_md_diff_labels = {}
 for k,v in MD_diff.items():
@@ -90,7 +90,7 @@ plt.ylabel('∆ FA')
 #plt.xticks(range(1, len(labels) + 1), labels, rotation=90)
 plt.title('Corruption of GM regions of MR scan at isocenter')
 
-plt.figure(2)
+plt.figure(num=2,figsize=(40,40))
 df_md_ldet = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in sorted_MDdiff_Ldet.items() ]))
 #md_ldet_labels = list(df_md_ldet.columns)
 ax = sns.boxplot(data=df_md_ldet)

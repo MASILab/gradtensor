@@ -8,7 +8,7 @@ import xml.etree.cElementTree as et
 import pandas as pd
 import scipy.io as sio
 
-MD_Lest = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_estimates/Lest_fa.nii').get_fdata()
+MD_Lest = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_estimates_noflip/Lest_fa.nii').get_fdata()
 MD_true = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_future_fieldmap/p_3tb_posA_mask_fa.nii').get_fdata()
 atlas_img = nib.load('/home-nfs2/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/reg/FAatlas2subj.nii.gz')
 atlas = atlas_img.get_fdata()
@@ -40,7 +40,7 @@ for i in range(1,51):
     alldiff = []
     allL_det[i] = L_det_roi
     L_det_roi=[]
-
+print(np.nanmean(allalldiff))
 # get the avg of MD diff and change the label no to that
 avg_md_diff_labels = {}
 for k,v in MD_diff.items():
