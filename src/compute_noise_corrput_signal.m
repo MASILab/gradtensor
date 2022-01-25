@@ -80,6 +80,22 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
     Nest_dwi = zeros(size(dwi_vols));
     NLest_dwi = zeros(size(dwi_vols));
     
+    % WM in b0
+    % wm = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/reg_epi/epi_re_fast_wmseg.nii
+    %spm_reslice({dwi_path;wm},flags)
+    r_wm = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/reg_epi/repi_re_fast_wmseg.nii';
+    rwm_mask = spm_vol(r_wm);
+    rwm_mask = spm_read_vols(rwm_mask);
+    rwm_mask(isnan(rwm_mask)) = 0;
+    wm_mask = logical(rwm_mask);
+
+    % Add complex guassian noise
+    SNR = 10;
+    mean_signal = mean(b0_vol(wm_mask))
+    noise_std = mean_signal / SNR;
+    n_dw_vol = size(dwi_vols,4);
+    real_noise = noise_std * randn(n_dw_vol,1);
+    img_noise = 1i * noise_std * randn(n_dw_vol,1);
     % Create complex guassian noise
     for i = 1:size(mask_vol,1)
         for j = 1:size(mask_vol,2)
@@ -107,6 +123,7 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
                        
                         % DWI signal with no corput
                         est_dwi(i,j,k,v) =  b0_vol(i,j,k)*exp(-1*ob*og'*DT_mat(:,:)*og);
+			Nest_dwi(i,j,k,v) = abs(est_dwi(i.j.k,v) + real_noise(i,j,k,v) + img_noise(i,j,k,v)) ;
                  
                         % To compute ADC
                         %bv_b0 = 0;
@@ -137,6 +154,7 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
 
                         % Signal equation with adjected bvec and bval  
                         Lest_dwi(i,j,k,v) = b0_vol(i,j,k)*exp(-1*adjbval*adjbvec'*DT_mat(:,:)*adjbvec) ;
+			NLest_dwi(i,j,k,v) = abs(Lest_dwi(i,j,k,v) + real_noise(i,j,k,v) + img_noise(i,j,k,v)) ;
                         % Compute ADC 
                         %ADC = (log(Lest_dwi(i,j,k,v) / (b0_vol(i,j,k))) * (1 / (bv_b0 - ob)));
                         %fprintf('ADC corpt %f for volume %i\n',[ADC, v]);
@@ -154,24 +172,24 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
     rwm_mask = spm_read_vols(rwm_mask);
     rwm_mask(isnan(rwm_mask)) = 0;
     wm_mask = logical(rwm_mask);
-    mean(b0(wm_mask)) 
 
     % Add complex guassian noise 
-    SNR = 1000; 
-    noise_std = mean(b0(wm_mask)) / SNR;
+    SNR = 100000;
+    mean_signal = mean(b0_vol(wm_mask)) 
+    noise_std = mean_signal / SNR;
     n_dw_vol = size(dwi_vols,4);
     real_noise = noise_std * randn(n_dw_vol,1);
     img_noise = 1i * noise_std * randn(n_dw_vol,1);
     for v = 1:length(bvals)
-	    Nest_dwi(i,j,k,v) = abs(est_dwi(i,j,k,v) + real_noise(v) + img_noise(v)) ;
-	    NLest_dwi(i,j,k,v) = abs(Lest_dwi(i,j,k,v) + real_noise(v) + img_noise(v)) ;
+	    Nest_dwi(:,:,:,v) = abs(est_dwi(:,:,:,v) + real_noise(v) + img_noise(v)) ;
+	    NLest_dwi(:,:,:,v) = abs(Lest_dwi(:,:,:,v) + real_noise(v) + img_noise(v)) ;
     end
     
     % Check if intended SNR is the actual SNR
     diff = Nest_dwi - est_dwi;
-    intended_snr =  mean(b0(wm_mask)) / std(reshape(diff,[],1))
-    diff = NLest_dwi - est_dwi;
-    intended_snr =  mean(b0(wm_mask)) / std(reshape(diff,[],1))
+    intended_snr =  mean_signal / std(reshape(diff,[],1))
+    diff = NLest_dwi - Lest_dwi;
+    intended_snr =  mean_signal / std(reshape(diff,[],1))
 
     % Save signal esimated. b0 volume is added since it was not used for the computation
     %dwmri_est = zeros(size(dwmri_vols));
