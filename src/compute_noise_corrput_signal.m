@@ -93,9 +93,9 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
     SNR = 10;
     mean_signal = mean(b0_vol(wm_mask))
     noise_std = mean_signal / SNR;
-    n_dw_vol = size(dwi_vols,4);
-    real_noise = noise_std * randn(n_dw_vol,1);
-    img_noise = 1i * noise_std * randn(n_dw_vol,1);
+    real_noise = noise_std * randn(size(dwi_vols));
+    img_noise = 1i * noise_std * randn(size(dwi_vols));
+
     % Create complex guassian noise
     for i = 1:size(mask_vol,1)
         for j = 1:size(mask_vol,2)
@@ -164,27 +164,6 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
         end
     end  
 
-    % WM in b0
-    % wm = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/reg_epi/epi_re_fast_wmseg.nii
-    %spm_reslice({dwi_path;wm},flags) 
-    r_wm = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/reg_epi/repi_re_fast_wmseg.nii';
-    rwm_mask = spm_vol(r_wm);
-    rwm_mask = spm_read_vols(rwm_mask);
-    rwm_mask(isnan(rwm_mask)) = 0;
-    wm_mask = logical(rwm_mask);
-
-    % Add complex guassian noise 
-    SNR = 100000;
-    mean_signal = mean(b0_vol(wm_mask)) 
-    noise_std = mean_signal / SNR;
-    n_dw_vol = size(dwi_vols,4);
-    real_noise = noise_std * randn(n_dw_vol,1);
-    img_noise = 1i * noise_std * randn(n_dw_vol,1);
-    for v = 1:length(bvals)
-	    Nest_dwi(:,:,:,v) = abs(est_dwi(:,:,:,v) + real_noise(v) + img_noise(v)) ;
-	    NLest_dwi(:,:,:,v) = abs(Lest_dwi(:,:,:,v) + real_noise(v) + img_noise(v)) ;
-    end
-    
     % Check if intended SNR is the actual SNR
     diff = Nest_dwi - est_dwi;
     intended_snr =  mean_signal / std(reshape(diff,[],1))
