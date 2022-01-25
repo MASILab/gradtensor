@@ -148,8 +148,7 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
 
     % WM in b0
     % wm = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/reg_epi/epi_re_fast_wmseg.nii
-    % 
-    %
+    %spm_reslice({dwi_path;wm},flags) 
     r_wm = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/reg_epi/repi_re_fast_wmseg.nii';
     rwm_mask = spm_vol(r_wm);
     rwm_mask = spm_read_vols(rwm_mask);
