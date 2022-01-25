@@ -157,7 +157,7 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
     mean(b0(wm_mask)) 
 
     % Add complex guassian noise 
-    SNR = 100; 
+    SNR = 1000; 
     noise_std = mean(b0(wm_mask)) / SNR;
     n_dw_vol = size(dwi_vols,4);
     real_noise = noise_std * randn(n_dw_vol,1);
@@ -174,45 +174,45 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
     intended_snr =  mean(b0(wm_mask)) / std(reshape(diff,[],1))
 
     % Save signal esimated. b0 volume is added since it was not used for the computation
-    dwmri_est = zeros(size(dwmri_vols));
-    dwmri_est(:,:,:,1) = b0_vol ;
-    dwmri_est(:,:,:,2:end) = est_dwi ; 
-    nii = load_untouch_nii(dwi_path);
-    nii.img = dwmri_est;
-    nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_est_sig']),nii,'double');
+    %dwmri_est = zeros(size(dwmri_vols));
+    %dwmri_est(:,:,:,1) = b0_vol ;
+    %dwmri_est(:,:,:,2:end) = est_dwi ; 
+    %nii = load_untouch_nii(dwi_path);
+    %nii.img = dwmri_est;
+    %nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_est_sig']),nii,'double');
     
     % Difference in original and signal esimation
-    diff = abs(est_dwi - dwi_vols);
-    nii.img = diff;
-    nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_est_org_diff']),nii,'double');
-    noise = std(diff,0,4);
-    snr_est = nanmean(est_dwi,4) ./ noise;
-    nanmean(snr_est(mask_vol));
+    %diff = abs(est_dwi - dwi_vols);
+    %nii.img = diff;
+    %nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_est_org_diff']),nii,'double');
+    %noise = std(diff,0,4);
+    %snr_est = nanmean(est_dwi,4) ./ noise;
+    %nanmean(snr_est(mask_vol));
    
     % Save the corrput signal estimated. b0 volume is added since it was not used for the computation
-    dwmri_Lest = zeros(size(dwmri_vols));
-    dwmri_Lest(:,:,:,1) = b0_vol ;
-    dwmri_Lest(:,:,:,2:end) = Lest_dwi ;
-    nii.img = dwmri_Lest;
-    nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Lest_sig']),nii,'double');
-    noise = std(Lest_dwi,0,4);
-    snr_Lest = nanmean(Lest_dwi,4) ./ noise;
+    %dwmri_Lest = zeros(size(dwmri_vols));
+    %dwmri_Lest(:,:,:,1) = b0_vol ;
+    %dwmri_Lest(:,:,:,2:end) = Lest_dwi ;
+    %nii.img = dwmri_Lest;
+    %nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Lest_sig']),nii,'double');
+    %noise = std(Lest_dwi,0,4);
+    %snr_Lest = nanmean(Lest_dwi,4) ./ noise;
 
     % Difference in orginal signal and after corrput signal esimation
-    Ldiff = abs(Lest_dwi - dwi_vols);
-    nii.img = Ldiff;
-    nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Lest_org_diff']),nii,'double');
-    Lnoise = std(Ldiff,0,4);
-    snr = nanmean(est_dwi,4) ./ Lnoise;
-    nanmean(snr(mask_vol))
+    %Ldiff = abs(Lest_dwi - dwi_vols);
+    %nii.img = Ldiff;
+    %nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Lest_org_diff']),nii,'double');
+    %Lnoise = std(Ldiff,0,4);
+    %snr = nanmean(est_dwi,4) ./ Lnoise;
+    %nanmean(snr(mask_vol))
     
     % Difference in before and after corrput signal esimation
-    Ldiff_est = abs(est_dwi - Lest_dwi);
-    nii.img = Ldiff_est;
-    nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Lest_est_diff']),nii,'double');
-    Lnoise = std(Ldiff,0,4);
-    snr = nanmean(est_dwi,4) ./ Lnoise;
-    nanmean(snr(mask_vol))
+    %Ldiff_est = abs(est_dwi - Lest_dwi);
+    %nii.img = Ldiff_est;
+    %nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Lest_est_diff']),nii,'double');
+    %Lnoise = std(Ldiff,0,4);
+    %snr = nanmean(est_dwi,4) ./ Lnoise;
+    %nanmean(snr(mask_vol))
 
     dwmri_Nest = zeros(size(dwmri_vols));
     dwmri_Nest(:,:,:,1) = b0_vol ;
