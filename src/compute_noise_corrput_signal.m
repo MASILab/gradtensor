@@ -90,7 +90,7 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
     wm_mask = logical(rwm_mask);
 
     % Add complex guassian noise
-    SNR = 100;
+    SNR = 1000;
     mean_signal = mean(b0_vol(wm_mask))
     noise_std = mean_signal / SNR;
     real_noise = noise_std * randn(size(dwi_vols));

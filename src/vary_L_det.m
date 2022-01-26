@@ -6,7 +6,7 @@ function [L_det, vL] = vary_L_det()
 	% vL		LR of the image
 % Required packages
 % for nifti_utils
-addpath('/nfs/masi/kanakap/masimatab/trunk/xnatspiders/matlab/justinlib_v1_7_0/niftilib/')
+addpath('/nfs/masi/kanakap/xnat_apps/masimatab/trunk/xnatspiders/matlab/justinlib_v1_7_0/niftilib/')
 % for load_untouch_header_only
 addpath('/home/local/VANDERBILT/kanakap/XNAT/TemporalLobe/revised_matlab_functions/')
 % for spm

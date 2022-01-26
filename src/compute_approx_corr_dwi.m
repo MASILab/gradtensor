@@ -118,7 +118,7 @@ end
 
 
 % Output prefix file name
-out_name = 'Lest';
+out_name = 'NLest';
 % Save the corrected signal (b0 was not used during computation so add that seperately to volume 1)
 corrected_signal = zeros(size(dwmri_vols));
 corrected_signal(:,:,:,1) = b0_vol ;
