@@ -90,7 +90,7 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
     wm_mask = logical(rwm_mask);
 
     % Add complex guassian noise
-    SNR = 10;
+    SNR = 100;
     mean_signal = mean(b0_vol(wm_mask))
     noise_std = mean_signal / SNR;
     real_noise = noise_std * randn(size(dwi_vols));
@@ -123,7 +123,7 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
                        
                         % DWI signal with no corput
                         est_dwi(i,j,k,v) =  b0_vol(i,j,k)*exp(-1*ob*og'*DT_mat(:,:)*og);
-			Nest_dwi(i,j,k,v) = abs(est_dwi(i.j.k,v) + real_noise(i,j,k,v) + img_noise(i,j,k,v)) ;
+             			Nest_dwi(i,j,k,v) = abs(est_dwi(i,j,k,v) + real_noise(i,j,k,v) + img_noise(i,j,k,v)) ;
                  
                         % To compute ADC
                         %bv_b0 = 0;
@@ -154,7 +154,7 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
 
                         % Signal equation with adjected bvec and bval  
                         Lest_dwi(i,j,k,v) = b0_vol(i,j,k)*exp(-1*adjbval*adjbvec'*DT_mat(:,:)*adjbvec) ;
-			NLest_dwi(i,j,k,v) = abs(Lest_dwi(i,j,k,v) + real_noise(i,j,k,v) + img_noise(i,j,k,v)) ;
+		            	NLest_dwi(i,j,k,v) = abs(Lest_dwi(i,j,k,v) + real_noise(i,j,k,v) + img_noise(i,j,k,v)) ;
                         % Compute ADC 
                         %ADC = (log(Lest_dwi(i,j,k,v) / (b0_vol(i,j,k))) * (1 / (bv_b0 - ob)));
                         %fprintf('ADC corpt %f for volume %i\n',[ADC, v]);
@@ -166,9 +166,11 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
 
     % Check if intended SNR is the actual SNR
     diff = Nest_dwi - est_dwi;
-    intended_snr =  mean_signal / std(reshape(diff,[],1))
+    diff = diff(mask_vol);
+    intended_snr =  mean_signal / std(diff)
     diff = NLest_dwi - Lest_dwi;
-    intended_snr =  mean_signal / std(reshape(diff,[],1))
+    diff = diff(mask_vol);
+    intended_snr =  mean_signal / std(diff)
 
     % Save signal esimated. b0 volume is added since it was not used for the computation
     %dwmri_est = zeros(size(dwmri_vols));
