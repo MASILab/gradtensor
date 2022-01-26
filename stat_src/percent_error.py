@@ -113,3 +113,27 @@ bpercent_change_pev_sm = 1 - (angular_error(btrue_pev, bsm_corr_pev) / angular_e
 bpercent_change_pev_bx = 1 - (angular_error(btrue_pev, bbx_corr_pev) / angular_error(btrue_pev, bcorpt_pev))
 print('md full pos b', np.nanmean(bpercent_change_pev_bx))
 print('md simple pos b', np.nanmean(bpercent_change_pev_sm))
+
+perc_err = 100* ((true_fa - corpt_fa) / true_fa)
+abs_perc_err = np.abs(perc_err)
+np.nanmean(abs_perc_err)
+
+perc_err = 100* ((true_md - corpt_md) / true_md)
+abs_perc_err = np.abs(perc_err)
+np.nanmean(abs_perc_err)
+
+perc_err = 100* ((true_fa - bx_corr_fa) / true_fa)
+abs_perc_err = np.abs(perc_err)
+np.nanmean(abs_perc_err)
+
+perc_err = 100* ((true_md - bx_corr_md) / true_md)
+abs_perc_err = np.abs(perc_err)
+np.nanmean(abs_perc_err)
+
+perc_err = 100* ((true_fa - sm_corr_fa) / true_fa)
+abs_perc_err = np.abs(perc_err)
+np.nanmean(abs_perc_err)
+
+perc_err = 100* ((true_md - sm_corr_md) / true_md)
+abs_perc_err = np.abs(perc_err)
+np.nanmean(abs_perc_err)
