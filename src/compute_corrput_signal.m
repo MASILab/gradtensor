@@ -87,18 +87,19 @@ function compute_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path, out_
                     % Get b0, dwi, bvecs and bvals               
                     b0 = b0_vol(i,j,k);
                     dwi = squeeze(dwi_vols(i,j,k,:))';
-                    bvecs = squeeze(bvec_vols(i,j,k,:,:))';
-                    bvals = squeeze(bval_vols(i,j,k,:))';
+                    %bvecs = squeeze(bvec_vols(i,j,k,:,:))';
+                    %bvals = squeeze(bval_vols(i,j,k,:))';
                     L_mat = squeeze(vL(:,:,i,j,k));
 
                     % Get linear model - use the corrected bvec and bval - considered as ground 
                     % truth tensor
-                    [DT_mat, exitcode] = linear_vox_fit(b0,dwi,bvecs,bvals);
+                    %[DT_mat, exitcode] = linear_vox_fit(b0,dwi,bvecs,bvals);
+                    [DT_mat, exitcode] = linear_vox_fit(b0,dwi,org_bvecs,org_bvals);
                    
                     % Induce corrpution (script adpated from compute_b_images.m) and signal equation
-                    for v = 1:length(bvals)
-                        g = bvecs(:,v);
-                        b = bvals(v);
+                    for v = 1:length(org_bvals)
+                        %g = bvecs(:,v);
+                        %b = bvals(v);
                         
                         og = org_bvecs(:,v);
                         ob = org_bvals(v);
@@ -106,7 +107,7 @@ function compute_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path, out_
                         % DWI signal with no corput
                         est_dwi(i,j,k,v) =  b0_vol(i,j,k)*exp(-1*ob*og'*DT_mat(:,:)*og);
 
-			% To compute ADC
+                        % To compute ADC
                         %bv_b0 = 0;
                         %ADC = (log(est_dwi(i,j,k,v) / (b0_vol(i,j,k))) * (1 / (bv_b0 - ob)));
                         %fprintf('ADC no corpt %f for volume %i\n',[ADC, v]);
@@ -134,7 +135,7 @@ function compute_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path, out_
                         % Signal equation with adjected bvec and bval  
                         Lest_dwi(i,j,k,v) = b0_vol(i,j,k)*exp(-1*adjbval*adjbvec'*DT_mat(:,:)*adjbvec);
 
-			% Compute ADC 
+                        % Compute ADC 
                         %ADC = (log(Lest_dwi(i,j,k,v) / (b0_vol(i,j,k))) * (1 / (bv_b0 - ob)));
                         %fprintf('ADC corpt %f for volume %i\n',[ADC, v]);
                     end
