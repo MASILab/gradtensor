@@ -13,11 +13,45 @@ function compute_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path, out_
     % 	org_bvec_path 	Original dwmri bval
     
     % Load data
-    dwmri_vols = nifti_utils.load_untouch_nii4D_vol_scaled(dwi_path,'double');
+    %{ 
+     flags = struct( ...
+	'mask',true, ...
+	'mean',false, ...
+	'interp',1, ...
+	'which',1, ...
+	'wrap',[0 0 0], ...
+	'prefix','r' ...
+    );
+    spm_reslice({our_dwi_path;dwi_path},flags)
+    dwi_path = '/nfs/masi/kanakap/projects/LR/population_basis_study/data/reg/rdwisubj2scanner.nii';
+    %spm_reslice({mask_path;wm},flags)
+    %mask_path = '/nfs/masi/kanakap/projects/LR/population_basis_study/data/rmask.nii'
+    %}
+    dwmri_vols = nifti_utils.load_untouch_nii4D_vol_scaled(dwi_path,'double'); 
     b0_vol = dwmri_vols(:,:,:,1);
     dwi_vols = dwmri_vols(:,:,:,2:end);
 
     % Load resampled L
+    %{
+    if strcmp(L_path(end-2:end),'.gz')
+	system(['gunzip -kf ' L_path]);
+	L_path = L_path(1:end-3);
+    end
+
+    flags = struct( ...
+	'mask',true, ...
+	'mean',false, ...
+	'interp',1, ...
+	'which',1, ...
+	'wrap',[0 0 0], ...
+	'prefix','r' ...
+	);
+	spm_reslice({dwi_path; L_path},flags);
+	[p,n,e] = fileparts(L_path);
+	rLimg_file = fullfile(p,['r' n e]);
+	movefile(rLimg_file,fullfile(out_dir,'L_resamp.nii'));
+	rLimg_file = fullfile(out_dir,'L_resamp.nii');
+    %}
     VL = spm_vol(rL_path);
     L = spm_read_vols(VL);
     nv = size(L,1);
@@ -55,6 +89,7 @@ function compute_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path, out_
 
     % Load the mask nii file
     if ~exist('mask_path','var') || isempty(mask_path)
+        disp('making mask')
         mask_vol = true(size(b0_vol));
     else
         %gunzip(mask_path)
@@ -80,21 +115,21 @@ function compute_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path, out_
     Lest_dwi = zeros(size(dwi_vols));
 
     % Cycle over and compute DT voxel-wise
-    for i = 1:size(mask_vol,1)
-        for j = 1:size(mask_vol,2)
-            for k = 1:size(mask_vol,3)
+    for i = 1:size(dwi_vols,1)
+        for j = 1:size(dwi_vols,2)
+            for k = 1:size(dwi_vols,3)
                 if mask_vol(i,j,k)
                     % Get b0, dwi, bvecs and bvals               
                     b0 = b0_vol(i,j,k);
                     dwi = squeeze(dwi_vols(i,j,k,:))';
-                    %bvecs = squeeze(bvec_vols(i,j,k,:,:))';
-                    %bvals = squeeze(bval_vols(i,j,k,:))';
+                    bvecs = squeeze(bvec_vols(i,j,k,:,:))';
+                    bvals = squeeze(bval_vols(i,j,k,:))';
                     L_mat = squeeze(vL(:,:,i,j,k));
 
                     % Get linear model - use the corrected bvec and bval - considered as ground 
                     % truth tensor
-                    %[DT_mat, exitcode] = linear_vox_fit(b0,dwi,bvecs,bvals);
-                    [DT_mat, exitcode] = linear_vox_fit(b0,dwi,org_bvecs,org_bvals);
+                    [DT_mat, exitcode] = linear_vox_fit(b0,dwi,bvecs,bvals);
+                    %[DT_mat, exitcode] = linear_vox_fit(b0,dwi,org_bvecs,org_bvals);
                    
                     % Induce corrpution (script adpated from compute_b_images.m) and signal equation
                     for v = 1:length(org_bvals)
