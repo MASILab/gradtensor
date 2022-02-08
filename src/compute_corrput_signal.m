@@ -13,45 +13,11 @@ function compute_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path, out_
     % 	org_bvec_path 	Original dwmri bval
     
     % Load data
-    %{ 
-     flags = struct( ...
-	'mask',true, ...
-	'mean',false, ...
-	'interp',1, ...
-	'which',1, ...
-	'wrap',[0 0 0], ...
-	'prefix','r' ...
-    );
-    spm_reslice({our_dwi_path;dwi_path},flags)
-    dwi_path = '/nfs/masi/kanakap/projects/LR/population_basis_study/data/reg/rdwisubj2scanner.nii';
-    %spm_reslice({mask_path;wm},flags)
-    %mask_path = '/nfs/masi/kanakap/projects/LR/population_basis_study/data/rmask.nii'
-    %}
     dwmri_vols = nifti_utils.load_untouch_nii4D_vol_scaled(dwi_path,'double'); 
     b0_vol = dwmri_vols(:,:,:,1);
     dwi_vols = dwmri_vols(:,:,:,2:end);
 
     % Load resampled L
-    %{
-    if strcmp(L_path(end-2:end),'.gz')
-	system(['gunzip -kf ' L_path]);
-	L_path = L_path(1:end-3);
-    end
-
-    flags = struct( ...
-	'mask',true, ...
-	'mean',false, ...
-	'interp',1, ...
-	'which',1, ...
-	'wrap',[0 0 0], ...
-	'prefix','r' ...
-	);
-	spm_reslice({dwi_path; L_path},flags);
-	[p,n,e] = fileparts(L_path);
-	rLimg_file = fullfile(p,['r' n e]);
-	movefile(rLimg_file,fullfile(out_dir,'L_resamp.nii'));
-	rLimg_file = fullfile(out_dir,'L_resamp.nii');
-    %}
     VL = spm_vol(rL_path);
     L = spm_read_vols(VL);
     nv = size(L,1);
@@ -166,6 +132,7 @@ function compute_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path, out_
                         lenkeeps = len~=0;
                         ab(:,lenkeeps) = ab(:,lenkeeps) ./ repmat(len(lenkeeps),3,1);
                         adjbvec = ab;
+			adjbvec(1) = -adjbvec(1);
                         
                         % Signal equation with adjected bvec and bval  
                         Lest_dwi(i,j,k,v) = b0_vol(i,j,k)*exp(-1*adjbval*adjbvec'*DT_mat(:,:)*adjbvec);
@@ -188,12 +155,12 @@ function compute_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path, out_
     nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_est_sig']),nii,'double');
     
     % Difference in original and signal esimation
-    diff = abs(est_dwi - dwi_vols);
-    nii.img = diff;
-    nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_est_org_diff']),nii,'double');
-    noise = std(diff,0,4);
-    snr = nanmean(est_dwi,4) ./ noise;
-    nanmean(snr(mask_vol))
+    %diff = abs(est_dwi - dwi_vols);
+    %nii.img = diff;
+    %nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_est_org_diff']),nii,'double');
+    %noise = std(diff,0,4);
+    %snr = nanmean(est_dwi,4) ./ noise;
+    %nanmean(snr(mask_vol))
    
     % Save the corrput signal estimated. b0 volume is added since it was not used for the computation
     dwmri_Lest = zeros(size(dwmri_vols));
@@ -203,19 +170,19 @@ function compute_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path, out_
     nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Lest_sig']),nii,'double');
 
     % Difference in orginal signal and after corrput signal esimation
-    Ldiff = abs(Lest_dwi - dwi_vols);
-    nii.img = Ldiff;
-    nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Lest_org_diff']),nii,'double');
-    Lnoise = std(Ldiff,0,4);
-    snr = nanmean(est_dwi,4) ./ Lnoise;
-    nanmean(snr(mask_vol))
+    %Ldiff = abs(Lest_dwi - dwi_vols);
+    %nii.img = Ldiff;
+    %nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Lest_org_diff']),nii,'double');
+    %Lnoise = std(Ldiff,0,4);
+    %snr = nanmean(est_dwi,4) ./ Lnoise;
+    %nanmean(snr(mask_vol))
     
     % Difference in before and after corrput signal esimation
-    Ldiff_est = abs(est_dwi - Lest_dwi);
-    nii.img = Ldiff_est;
-    nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Lest_est_diff']),nii,'double');
-    Lnoise = std(Ldiff,0,4);
-    snr = nanmean(est_dwi,4) ./ Lnoise;
-    nanmean(snr(mask_vol))
+    %Ldiff_est = abs(est_dwi - Lest_dwi);
+    %nii.img = Ldiff_est;
+    %nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Lest_est_diff']),nii,'double');
+    %Lnoise = std(Ldiff,0,4);
+    %snr = nanmean(est_dwi,4) ./ Lnoise;
+    %nanmean(snr(mask_vol))
     
 end
