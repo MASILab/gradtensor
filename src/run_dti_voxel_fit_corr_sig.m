@@ -8,14 +8,17 @@ addpath('/home/local/VANDERBILT/kanakap/XNAT/TemporalLobe/revised_matlab_functio
 addpath(genpath('../external/spm_read_nii'))
 addpath(genpath('../external/spm_reslice'))
 
-gunzip('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/mask.nii.gz')
+%gunzip('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/mask.nii.gz')
 
-dwi_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/ISMRM_sm_noise1000/NLest_corrected_sig.nii';
-bvec_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/INPUTS/dwmri.bvec';
-bval_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/INPUTS/dwmri.bval';
-mask_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/mask.nii';
-out_dir = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/ISMRM_sm_noise1000/';
-out_name = 'NLest_corr_sm';
+dwi_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/BLSA_sm/Lest_corrected_sig.nii';
+%bvec_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/INPUTS/dwmri.bvec';
+%bval_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/INPUTS/dwmri.bval';
+%mask_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/mask.nii';
+bvec_path = '/nfs/masi/kanakap/projects/LR/population_basis_study/data/Diffusion.bvecs';
+bval_path = '/nfs/masi/kanakap/projects/LR/population_basis_study/data/Diffusion.bvals';
+mask_path = '/nfs/masi/kanakap/projects/LR/population_basis_study/data/reg/dwi_mask.nii';
+out_dir = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/BLSA_sm/';
+out_name = 'Lest_corr_sm';
 
 %dti_voxel_fit(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_name);
 dti_voxel_fit_sig(dwi_path,bvec_path,bval_path,mask_path, out_dir, out_name);

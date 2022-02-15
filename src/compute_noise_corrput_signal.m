@@ -1,4 +1,4 @@
-function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_name, rL_path, org_bvec_path, org_bval_path)
+function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_name, rL_path, org_bvec_path, org_bval_path, initial_SNR)
     % compute_noise_corrput_signal Computes signal with LR and noise induced in it 
     %
     % Inputs
@@ -90,12 +90,13 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
     wm_mask = logical(rwm_mask);
 
     % Add complex guassian noise
-    SNR = 1000;
+    SNR = initial_SNR;
     mean_signal = mean(b0_vol(wm_mask))
-    noise_std = mean_signal / SNR;
+    noise_std = mean_signal / initial_SNR;
+    randn('state',sum(100*clock));
     real_noise = noise_std * randn(size(dwi_vols));
     img_noise = 1i * noise_std * randn(size(dwi_vols));
-
+    
     % Create complex guassian noise
     for i = 1:size(mask_vol,1)
         for j = 1:size(mask_vol,2)
@@ -123,7 +124,7 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
                        
                         % DWI signal with no corput
                         est_dwi(i,j,k,v) =  b0_vol(i,j,k)*exp(-1*ob*og'*DT_mat(:,:)*og);
-             			Nest_dwi(i,j,k,v) = abs(est_dwi(i,j,k,v) + real_noise(i,j,k,v) + img_noise(i,j,k,v)) ;
+           		Nest_dwi(i,j,k,v) = abs(est_dwi(i,j,k,v) + real_noise(i,j,k,v) + img_noise(i,j,k,v)) ;
                  
                         % To compute ADC
                         %bv_b0 = 0;
@@ -163,7 +164,7 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
             end
         end
     end  
-
+    save('noise1.mat','real_noise','img_noise')
     % Check if intended SNR is the actual SNR
     diff = Nest_dwi - est_dwi;
     diff = diff(mask_vol);
@@ -218,13 +219,13 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
     dwmri_Nest(:,:,:,2:end) = Nest_dwi ;
     nii = load_untouch_nii(dwi_path);
     nii.img = dwmri_Nest;
-    nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Nest_sig']),nii,'double');
+    nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_est_sig']),nii,'double');
 
     dwmri_NLest = zeros(size(dwmri_vols));
     dwmri_NLest(:,:,:,1) = b0_vol ;
     dwmri_NLest(:,:,:,2:end) = NLest_dwi ;
     nii = load_untouch_nii(dwi_path);
     nii.img = dwmri_NLest;
-    nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_NLest_sig']),nii,'double');
-    
+    nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Lest_sig']),nii,'double');
+   
 end

@@ -3,6 +3,8 @@ function compute_approximate_corr_dwi( ...
 	refimg_file, ...
 	bval_file, ...
 	bvec_file, ...
+	mask_path, ...
+	out_name, ...
 	out_dir ...
 	)
 
@@ -13,6 +15,8 @@ function compute_approximate_corr_dwi( ...
 %    refimg_file
 %    bval_file        B value text file
 %    bvec_file        B vector text file
+%    mask_path        Path to the mask
+%    out_name         Prefix of the output filename
 %    out_dir          Output directory
 
 % Unzip
@@ -57,7 +61,8 @@ vL(2,3,:) = L(:,6);
 vL(3,1,:) = L(:,7);
 vL(3,2,:) = L(:,8);
 vL(3,3,:) = L(:,9);
-vL = reshape(vL,[3,3,96,96,68]);
+size_VL = size(spm_read_vols(VL));
+vL = reshape(vL,[3,3,size_VL(1),size_VL(2),size_VL(3)]);
 
 
 % Load data
@@ -68,9 +73,16 @@ dwi_vols = dwmri_vols(:,:,:,2:end);
 size(dwi_vols)
 
 % Load the mask
-mask_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/mask.nii';
-mask_vol = nifti_utils.load_untouch_nii_vol_scaled(mask_path,'double');
-mask_vol = logical(mask_vol);
+%mask_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/mask.nii';
+%mask_path = '/nfs/masi/kanakap/projects/LR/population_basis_study/data/reg/dwi_mask.nii';
+if ~exist('mask_path','var') || isempty(mask_path)
+        disp('making mask')
+        mask_vol = true(size(b0_vol));
+    else
+        %gunzip(mask_path)
+        mask_vol = nifti_utils.load_untouch_nii_vol_scaled(mask_path,'double');
+        mask_vol = logical(mask_vol);
+    end
 
 % Load B values and vectors
 bval = load(bval_file);
@@ -87,27 +99,27 @@ new_dwi_signal = zeros(size(dwi_vols));
 size(new_dwi_signal)
 
 % Compute the new signal by looping thought the number of bvals and along the x, y, z axis
-for i = 1:24
+for i = 1:size(dwi_vols,4)
     for x = 1:size(dwi_vols,1)
         for y = 1:size(dwi_vols,2)
             for z = 1:size(dwi_vols,3)
                 if mask_vol(x,y,z)
-			% LR 
+                        % LR 
                         L_mat = squeeze(vL(:,:,x,y,z));
-			% Original bval and bvec
-			og = bvec(:,i);
+                        % Original bval and bvec
+                        og = bvec(:,i);
                         ob = bval(i);
                         og(1) = -og(1);
 
-			% Adjus bvec by L*bvec and then compute the length change 
+                        % Adjus bvec by L*bvec and then compute the length change 
                         gg = L_mat * og;
                         norm_gg = sum(gg.^2);
-                        
-			% Compute the new signal with length change 
-			%new_dwi_signal(v) = b0 * exp( (log(S_corpt(v)/b0)) / len2 );
+            
+                        % Compute the new signal with length change 
+                        %new_dwi_signal(v) = b0 * exp( (log(S_corpt(v)/b0)) / len2 );
                         new_dwi_signal(x,y,z,i) = b0_vol(x,y,z) * exp( (log(dwi_vols(x,y,z,i)/b0_vol(x,y,z))) / norm_gg);
                         % Compute the ADC if required
-			%bv_b0 = 0;
+                        %bv_b0 = 0;
                         %ADC = log(new_dwi_signal(x,y,z,i) / (b0_vol(x,y,z))) * (1 / (bv_b0 - ob));
                         %fprintf('ADC simple corr %f for volume %i\n', [ADC, i]);
                 end
@@ -118,11 +130,11 @@ end
 
 
 % Output prefix file name
-out_name = 'NLest';
+%out_name = 'Lest';
 % Save the corrected signal (b0 was not used during computation so add that seperately to volume 1)
 corrected_signal = zeros(size(dwmri_vols));
 corrected_signal(:,:,:,1) = b0_vol ;
 corrected_signal(:,:,:,2:end) = new_dwi_signal ;
 nii = load_untouch_nii(refimg_file);
 nii.img = corrected_signal;
-nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_corrected_sig']),nii,'double');
+nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_sig']),nii,'double');

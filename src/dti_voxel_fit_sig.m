@@ -26,11 +26,11 @@ b0_vol = dwi_vols(:,:,:,1);
 dwi_vols = dwi_vols(:,:,:,2:end);
     
 % Get the size from dwmri
-VD = spm_vol(dwi_path);
-D = spm_read_vols(VD);
-disp(size(D));
-D = reshape(D,[],25);
-nv = size(D,1);
+%VD = spm_vol(dwi_path);
+%D = spm_read_vols(VD);
+%disp(size(D));
+%D = reshape(D,[],25);
+%nv = size(D,1);
 
 % Load bvec and bval 
 %bvec_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/INPUTS/dwmri.bvec';
@@ -46,8 +46,16 @@ bvec(:,1) = [];
 
 % Load mask 
 %mask_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/mask.nii';
-mask_vol = nifti_utils.load_untouch_nii_vol_scaled(mask_path,'double');
-mask_vol = logical(mask_vol);
+if ~exist('mask_path','var') || isempty(mask_path)
+        disp('making mask')
+        mask_vol = true(size(b0_vol));
+    else
+        %gunzip(mask_path)
+        mask_vol = nifti_utils.load_untouch_nii_vol_scaled(mask_path,'double');
+        mask_vol = logical(mask_vol);
+    end
+%mask_vol = nifti_utils.load_untouch_nii_vol_scaled(mask_path,'double');
+%mask_vol = logical(mask_vol);
 
 % Initialize DT and exitcode volumes
 exitcode_vol = zeros(size(b0_vol));
@@ -55,9 +63,9 @@ eig_vol = zeros(size(b0_vol,1),size(b0_vol,2),size(b0_vol,3),3);
 primary_vec_vol = zeros(size(eig_vol)); 
 
 % Cycle over and compute DT voxel-wise
-    for i = 1:size(mask_vol,1)
-        for j = 1:size(mask_vol,2)
-            for k = 1:size(mask_vol,3)
+    for i = 1:size(dwi_vols,1)
+        for j = 1:size(dwi_vols,2)
+            for k = 1:size(dwi_vols,3)
                 if mask_vol(i,j,k)
                     % Get b0, dwi, bvecs and bvals
                     b0 = b0_vol(i,j,k);
