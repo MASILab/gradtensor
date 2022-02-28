@@ -42,7 +42,7 @@ corpt_fa_dict = {}
 pre = '/nfs/masi/kanakap/projects/LR/aggregate_study/'
 post = '/uncorrected_fa.nii'
 for i in range(1,20):
-    outdir = pre + 'OUTPUTnoise100_' +str(i) + post
+    outdir = pre + 'OUTPUTnoise3_' +str(i) + post
     corpt_fa = nib.load(outdir).get_fdata()
     corpt_fa_dict[i] = corpt_fa
 
@@ -54,7 +54,7 @@ corr_sm_fa_dict = {}
 pre = '/nfs/masi/kanakap/projects/LR/aggregate_study/'
 post = '/approx_corrected_fa.nii'
 for i in range(1,20):
-    outdir = pre + 'OUTPUTnoise100_' +str(i) + post
+    outdir = pre + 'OUTPUTnoise3_' +str(i) + post
     corr_fa = nib.load(outdir).get_fdata()
     corr_sm_fa_dict[i] = corr_fa
 
@@ -67,7 +67,7 @@ corr_bx_fa_dict = {}
 for i in range(1,20):
     pre = '/nfs/masi/kanakap/projects/LR/aggregate_study/'
     post = '/emp_corrected_fa.nii'
-    outdir = pre + 'OUTPUTnoise100_' +str(i) + post
+    outdir = pre + 'OUTPUTnoise3_' +str(i) + post
     corr_fa = nib.load(outdir).get_fdata()
     corr_bx_fa_dict[i] = corr_fa
 
@@ -81,8 +81,8 @@ slice_idx = 45;
 
 corpt_bias = rmse_voxelwise(corpt_fa_mean,true_fa)
 slice = corpt_bias[:,slice_idx,:]
-m = slice.min()
-M = slice.max()
+m = 0
+M = 0.1
 slice = np.flip(np.rot90(slice,3))
 slice = np.nan_to_num(slice)
 plt.subplot(3,4,1)
@@ -90,13 +90,14 @@ plt.axis('off')
 cmap = plt.get_cmap('viridis')
 im = plt.imshow(np.abs(slice), vmin=m, vmax=M, cmap= parula)
 #plt.title("Ground Truth FA", fontdict = {'fontsize' : 15})
+plt.title("Corrpution Bias")
 divider = make_axes_locatable(plt.gca())
 ax = divider.append_axes("right", size="5%", pad=0.05)
 a = plt.colorbar(im, cax=ax)
 
 slice = corpt_fa_variance[:,slice_idx,:]
 m = 0
-M = slice.min()
+M = 0.1
 slice = np.flip(np.rot90(slice,3))
 slice = np.nan_to_num(slice)
 plt.subplot(3,4,2)
@@ -105,6 +106,7 @@ cmap = plt.get_cmap('viridis')
 im = plt.imshow(np.abs(slice), vmin=m, vmax=M, cmap= parula)
 #plt.title("\u0394 FA \n Corrupt - Ground Truth", fontdict = {'fontsize' : 15})
 #plt.title("Abs FA change in \n Corruption and Ground Truth")
+plt.title("Corruption Varience")
 divider = make_axes_locatable(plt.gca())
 ax = divider.append_axes("right", size="5%", pad=0.05)
 a = plt.colorbar(im, cax=ax)
@@ -121,6 +123,7 @@ cmap = plt.get_cmap('viridis')
 im = plt.imshow(np.abs(slice), vmin=m, vmax=M, cmap= parula)
 #plt.title("\u0394 FA \n Approx. - Ground Truth", fontdict = {'fontsize' : 15})
 #plt.title("Abs FA change in \n Shortcut Correction Method \n and Ground Truth")
+plt.title("Bias Emp. Correction")
 divider = make_axes_locatable(plt.gca())
 ax = divider.append_axes("right", size="5%", pad=0.05)
 a = plt.colorbar(im, cax=ax)
@@ -136,6 +139,7 @@ cmap = plt.get_cmap('viridis')
 im = plt.imshow(np.abs(slice), vmin=m, vmax=M, cmap= parula)
 #plt.title("\u0394 FA \n Approx. - Ground Truth", fontdict = {'fontsize' : 15})
 #plt.title("Abs FA change in \n Shortcut Correction Method \n and Ground Truth")
+plt.title("Varience Emp. Correction")
 divider = make_axes_locatable(plt.gca())
 ax = divider.append_axes("right", size="5%", pad=0.05)
 a = plt.colorbar(im, cax=ax)
@@ -152,6 +156,7 @@ cmap = plt.get_cmap('viridis')
 im = plt.imshow(np.abs(slice), vmin=m, vmax=M, cmap= parula)
 #plt.title("\u0394 FA \n Approx. - Ground Truth", fontdict = {'fontsize' : 15})
 #plt.title("Abs FA change in \n Shortcut Correction Method \n and Ground Truth")
+plt.title("\u0394 Bais \n Emp. Correction \n and Corpt")
 divider = make_axes_locatable(plt.gca())
 ax = divider.append_axes("right", size="5%", pad=0.05)
 a = plt.colorbar(im, cax=ax)
@@ -168,6 +173,7 @@ cmap = plt.get_cmap('viridis')
 im = plt.imshow(np.abs(slice), vmin=m, vmax=M, cmap= parula)
 #plt.title("\u0394 FA \n Approx. - Ground Truth", fontdict = {'fontsize' : 15})
 #plt.title("Abs FA change in \n Shortcut Correction Method \n and Ground Truth")
+plt.title("\u0394 Varience \n Emp. Correction \n and Corpt")
 divider = make_axes_locatable(plt.gca())
 ax = divider.append_axes("right", size="5%", pad=0.05)
 a = plt.colorbar(im, cax=ax)
@@ -184,6 +190,7 @@ cmap = plt.get_cmap('viridis')
 im = plt.imshow(np.abs(slice), vmin=m, vmax=M, cmap= parula)
 #plt.title("\u0394 FA \n Approx. - Ground Truth", fontdict = {'fontsize' : 15})
 #plt.title("Abs FA change in \n Shortcut Correction Method \n and Ground Truth")
+plt.title("Approx. Correction Bais")
 divider = make_axes_locatable(plt.gca())
 ax = divider.append_axes("right", size="5%", pad=0.05)
 a = plt.colorbar(im, cax=ax)
@@ -199,6 +206,7 @@ cmap = plt.get_cmap('viridis')
 im = plt.imshow(np.abs(slice), vmin=m, vmax=M, cmap= parula)
 #plt.title("\u0394 FA \n Approx. - Ground Truth", fontdict = {'fontsize' : 15})
 #plt.title("Abs FA change in \n Shortcut Correction Method \n and Ground Truth")
+plt.title("Approx. Correction Varience")
 divider = make_axes_locatable(plt.gca())
 ax = divider.append_axes("right", size="5%", pad=0.05)
 a = plt.colorbar(im, cax=ax)
@@ -215,7 +223,7 @@ plt.axis('off')
 cmap = plt.get_cmap('viridis')
 im = plt.imshow(np.abs(slice), vmin=m, vmax=M, cmap= parula)
 #plt.title("\u0394 FA \n Approx. - Ground Truth", fontdict = {'fontsize' : 15})
-#plt.title("Abs FA change in \n Shortcut Correction Method \n and Ground Truth")
+plt.title("\u0394 Bais \n Approx. Correction \n and Corpt")
 divider = make_axes_locatable(plt.gca())
 ax = divider.append_axes("right", size="5%", pad=0.05)
 a = plt.colorbar(im, cax=ax)
@@ -231,7 +239,7 @@ plt.axis('off')
 cmap = plt.get_cmap('viridis')
 im = plt.imshow(np.abs(slice), vmin=m, vmax=M, cmap= parula)
 #plt.title("\u0394 FA \n Approx. - Ground Truth", fontdict = {'fontsize' : 15})
-#plt.title("Abs FA change in \n Shortcut Correction Method \n and Ground Truth")
+plt.title("\u0394 Varience \n Approx. Correction\n and Corpt")
 divider = make_axes_locatable(plt.gca())
 ax = divider.append_axes("right", size="5%", pad=0.05)
 a = plt.colorbar(im, cax=ax)
