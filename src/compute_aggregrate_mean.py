@@ -5,32 +5,63 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import nmmn.plots
 parula=nmmn.plots.parulacmap() # for MATLAB's cmap
+from sklearn.metrics import mean_squared_error
+
+def rmse_voxelwise(imga, imgb):
+    rmse_img = np.zeros((96,96,68))
+    for x in range(96):
+        for y in range(96):
+            for z in range(68):
+                err = np.mean((imga[x,y,z] - imgb[x,y,z]) ** 2)
+                err = np.sqrt(err)
+                rmse_img[x,y,z] = err
+    return rmse_img
+
+def mse_voxelwise(imga, imgb):
+    mse_img = np.zeros((96,96,68))
+    for x in range(96):
+        for y in range(96):
+            for z in range(68):
+                err = np.mean((imga[x,y,z] - imgb[x,y,z]) ** 2)
+                err = np.sqrt(err)
+                mse_img[x,y,z] = err
+    return mse_img
+
+mse_img_dict = {}
+def varience_voxelwise(mean_img, img_dict):
+    for i in range(1,20):
+        mse_img = mse_voxelwise(mean_img, img_dict[i])
+        mse_img_dict[i] = mse_img
+    mse_img_list = np.array(list(mse_img_dict.values()))
+    varience_voxelwise = np.nanmean(mse_img_list,0)
+    return varience_voxelwise
 
 true_fa = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_future_fieldmap/p_3tb_posA_mask_fa.nii').get_fdata()
 
 corpt_fa_dict = {}
+pre = '/nfs/masi/kanakap/projects/LR/aggregate_study/'
+post = '/uncorrected_fa.nii'
 for i in range(1,20):
-    pre = '/nfs/masi/kanakap/projects/LR/aggregate_study/'
-    post = '/uncorrected_fa.nii'
     outdir = pre + 'OUTPUTnoise100_' +str(i) + post
     corpt_fa = nib.load(outdir).get_fdata()
     corpt_fa_dict[i] = corpt_fa
 
 corpt_fa_list = np.array(list(corpt_fa_dict.values()))
 corpt_fa_mean = np.nanmean(corpt_fa_list,0)
-corpt_fa_variance = np.nanvar(corpt_fa_list,0) #/ corpt_fa_mean
+corpt_fa_variance = varience_voxelwise(corpt_fa_mean, corpt_fa_dict) #np.nanvar(corpt_fa_list,0) #/ corpt_fa_mean
 
 corr_sm_fa_dict = {}
+pre = '/nfs/masi/kanakap/projects/LR/aggregate_study/'
+post = '/approx_corrected_fa.nii'
 for i in range(1,20):
-    pre = '/nfs/masi/kanakap/projects/LR/aggregate_study/'
-    post = '/approx_corrected_fa.nii'
     outdir = pre + 'OUTPUTnoise100_' +str(i) + post
     corr_fa = nib.load(outdir).get_fdata()
     corr_sm_fa_dict[i] = corr_fa
 
 corr_sm_fa_list = np.array(list(corr_sm_fa_dict.values()))
 corr_sm_fa_mean = np.nanmean(corr_sm_fa_list,0)
-corr_sm_fa_variance = np.nanvar(corr_sm_fa_list,0) #/ corr_sm_fa_mean
+corr_sm_fa_variance = varience_voxelwise(corr_sm_fa_mean, corr_sm_fa_dict)
+#corr_sm_fa_variance = np.nanvar(corr_sm_fa_list,0) #/ corr_sm_fa_mean
 
 corr_bx_fa_dict = {}
 for i in range(1,20):
@@ -42,12 +73,13 @@ for i in range(1,20):
 
 corr_bx_fa_list = np.array(list(corr_bx_fa_dict.values()))
 corr_bx_fa_mean = np.nanmean(corr_bx_fa_list,0)
-corr_bx_fa_variance = np.nanvar(corr_bx_fa_list,0) #/ corr_bx_fa_mean
+corr_bx_fa_variance = varience_voxelwise(corr_bx_fa_mean,corr_bx_fa_dict)
+#corr_bx_fa_variance = np.nanvar(corr_bx_fa_list,0) #/ corr_bx_fa_mean
 
 plt.figure();
 slice_idx = 45;
 
-corpt_bias = corpt_fa_mean - true_fa
+corpt_bias = rmse_voxelwise(corpt_fa_mean,true_fa)
 slice = corpt_bias[:,slice_idx,:]
 m = slice.min()
 M = slice.max()
@@ -64,7 +96,7 @@ a = plt.colorbar(im, cax=ax)
 
 slice = corpt_fa_variance[:,slice_idx,:]
 m = 0
-M = 0.1
+M = slice.min()
 slice = np.flip(np.rot90(slice,3))
 slice = np.nan_to_num(slice)
 plt.subplot(3,4,2)
@@ -77,7 +109,7 @@ divider = make_axes_locatable(plt.gca())
 ax = divider.append_axes("right", size="5%", pad=0.05)
 a = plt.colorbar(im, cax=ax)
 
-corr_bx_bias = corr_bx_fa_mean - true_fa
+corr_bx_bias = rmse_voxelwise(corr_bx_fa_mean,true_fa)
 slice = corr_bx_bias[:,slice_idx,:]
 m = 0
 M = 0.1
@@ -140,7 +172,7 @@ divider = make_axes_locatable(plt.gca())
 ax = divider.append_axes("right", size="5%", pad=0.05)
 a = plt.colorbar(im, cax=ax)
 
-corr_sm_bais = (corr_sm_fa_mean - true_fa)
+corr_sm_bais = rmse_voxelwise(corr_sm_fa_mean,true_fa)
 slice = corr_sm_bais[:,slice_idx,:]
 m = 0
 M = 0.1
@@ -172,7 +204,7 @@ ax = divider.append_axes("right", size="5%", pad=0.05)
 a = plt.colorbar(im, cax=ax)
 
 
-corr_sm_fa_diff = (corr_sm_bais - corpt_bias)
+corr_sm_fa_diff = rmse_voxelwise(corr_sm_bais,corpt_bias)
 slice = corr_sm_fa_diff[:,slice_idx,:]
 m = 0
 M = 0.1
