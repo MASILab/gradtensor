@@ -67,10 +67,16 @@ vL = reshape(vL,[3,3,size_VL(1),size_VL(2),size_VL(3)]);
 
 % Load data
 dwmri_vols = nifti_utils.load_untouch_nii4D_vol_scaled(refimg_file,'double');
-size(dwmri_vols)
-b0_vol = dwmri_vols(:,:,:,1);
-dwi_vols = dwmri_vols(:,:,:,2:end);
-size(dwi_vols)
+bvec = load(bvec_file);
+bval = load(bval_file);
+
+% dwi and non-dwi
+ind_b0 = find(~bval);
+ind_non_b0 = find(bval);
+
+all_b0_vol = dwmri_vols(:,:,:,ind_b0);
+b0_vol = mean(all_b0_vol,4);
+dwi_vols = dwmri_vols(:,:,:,ind_non_b0);
 
 % Load the mask
 %mask_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/mask.nii';
@@ -85,10 +91,8 @@ if ~exist('mask_path','var') || isempty(mask_path)
     end
 
 % Load B values and vectors
-bval = load(bval_file);
-bvec = load(bvec_file);
-bval = bval(2:end);
-bvec = bvec(1:3,2:end); %remove b0
+bval = bval(ind_non_b0);
+bvec = bvec(:,ind_non_b0); %remove b0
 nb = length(bval);
 
 % Resmaple L image
@@ -133,8 +137,8 @@ end
 %out_name = 'Lest';
 % Save the corrected signal (b0 was not used during computation so add that seperately to volume 1)
 corrected_signal = zeros(size(dwmri_vols));
-corrected_signal(:,:,:,1) = b0_vol ;
-corrected_signal(:,:,:,2:end) = new_dwi_signal ;
+corrected_signal(:,:,:,ind_b0) = all_b0_vol ;
+corrected_signal(:,:,:,ind_non_b0) = new_dwi_signal ;
 nii = load_untouch_nii(refimg_file);
 nii.img = corrected_signal;
 nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_sig']),nii,'double');

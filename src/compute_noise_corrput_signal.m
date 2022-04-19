@@ -1,4 +1,4 @@
-function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_name, rL_path, org_bvec_path, org_bval_path, initial_SNR)
+function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_name, L_path, org_bvec_path, org_bval_path, initial_SNR)
     % compute_noise_corrput_signal Computes signal with LR and noise induced in it 
     %
     % Inputs
@@ -14,10 +14,43 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
     
     % Load data
     dwmri_vols = nifti_utils.load_untouch_nii4D_vol_scaled(dwi_path,'double');
-    b0_vol = dwmri_vols(:,:,:,1);
-    dwi_vols = dwmri_vols(:,:,:,2:end);
+    % Load the original bvec and bval
+    org_bvecs = importdata(org_bvec_path);
+    org_bvals = importdata(org_bval_path);
+
+    % dwi and non-dwi
+    ind_b0 = find(~org_bvals);
+    ind_non_b0 = find(org_bvals);
+
+    org_bvecs = org_bvecs(:,ind_non_b0);
+    org_bvals = org_bvals(ind_non_b0);
+
+    all_b0_vol = dwmri_vols(:,:,:,ind_b0);
+    b0_vol = mean(all_b0_vol,4);
+    dwi_vols = dwmri_vols(:,:,:,ind_non_b0);
+
     % Load resampled L
-    VL = spm_vol(rL_path);
+    % Resample grad tensor to DTI image space
+    % Unzip
+    if strcmp(L_path(end-2:end),'.gz')
+        system(['gunzip -kf ' L_path]);
+        L_path = L_path(1:end-3);
+    end
+    flags = struct( ...
+        'mask',true, ...
+        'mean',false, ...
+        'interp',1, ...
+        'which',1, ...
+        'wrap',[0 0 0], ...
+        'prefix','r' ...
+        );
+    spm_reslice({dwi_path; L_path},flags);
+    [p,n,e] = fileparts(L_path);
+    rLimg_file = fullfile(p,['r' n e]);
+    movefile(rLimg_file,fullfile(out_dir,'L_resamp.nii'));
+    rLimg_file = fullfile(out_dir,'L_resamp.nii');
+
+    VL = spm_vol(rLimg_file);
     L = spm_read_vols(VL);
     nv = size(L,1);
     vL = zeros(3,3,size(L,1),size(L,2),size(L,3));
@@ -65,12 +98,6 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
     bvec_vols = bvec_vols(:,:,:,2:end,:);
     bval_vols = bval_vols(:,:,:,2:end);
     
-    % Load the original bvec and bval 
-    org_bvecs = importdata(org_bvec_path);
-    org_bvals = importdata(org_bval_path);
-    org_bvecs = org_bvecs(:,2:end);
-    org_bvals = org_bvals(2:end);
-
     % Initialize DT and exitcode volumes
     exitcode_vol = zeros(size(b0_vol));
     eig_vol = zeros(size(b0_vol,1),size(b0_vol,2),size(b0_vol,3),3);
@@ -81,9 +108,11 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
     NLest_dwi = zeros(size(dwi_vols));
     
     % WM in b0
+    % use bet, fast and ants for wm segmentation 
     % wm = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/reg_epi/epi_re_fast_wmseg.nii
     %spm_reslice({dwi_path;wm},flags)
-    r_wm = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/reg_epi/repi_re_fast_wmseg.nii';
+    %r_wm = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/reg_epi/repi_re_fast_wmseg.nii';
+    r_wm = '/home/local/VANDERBILT/kanakap/MASIVAR_LR_input1/rwmseg_reg_skull_stripped.nii';
     rwm_mask = spm_vol(r_wm);
     rwm_mask = spm_read_vols(rwm_mask);
     rwm_mask(isnan(rwm_mask)) = 0;
@@ -98,25 +127,25 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
     img_noise = 1i * noise_std * randn(size(dwi_vols));
     
     % Create complex guassian noise
-    for i = 1:size(mask_vol,1)
-        for j = 1:size(mask_vol,2)
-            for k = 1:size(mask_vol,3)
+    for i = 1:size(dwi_vols,1)
+        for j = 1:size(dwi_vols,2)
+            for k = 1:size(dwi_vols,3)
                 if mask_vol(i,j,k)
                     % Get b0, dwi, bvecs and bvals   
                     b0 = b0_vol(i,j,k);
                     dwi = squeeze(dwi_vols(i,j,k,:))';
-                    bvecs = squeeze(bvec_vols(i,j,k,:,:))';
-                    bvals = squeeze(bval_vols(i,j,k,:))';
+                    %bvecs = squeeze(bvec_vols(i,j,k,:,:))';
+                    %bvals = squeeze(bval_vols(i,j,k,:))';
                     L_mat = squeeze(vL(:,:,i,j,k));
 
                     % Get linear model - use the corrected bvec and bval - considered as ground 
                     % truth tensor
-                    [DT_mat, exitcode] = linear_vox_fit(b0,dwi,bvecs,bvals);
+                    [DT_mat, exitcode] = linear_vox_fit(b0,dwi,org_bvecs,org_bvals);
                    
                     % Induce corrpution (script adpated from compute_b_images.m) and signal equation
-                    for v = 1:length(bvals)
-                        g = bvecs(:,v);
-                        b = bvals(v);
+                    for v = 1:length(org_bvals)
+                        %ig = bvecs(:,v);
+                        %b = bvals(v);
                         
                         og = org_bvecs(:,v);
                         ob = org_bvals(v);
@@ -155,7 +184,7 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
 
                         % Signal equation with adjected bvec and bval  
                         Lest_dwi(i,j,k,v) = b0_vol(i,j,k)*exp(-1*adjbval*adjbvec'*DT_mat(:,:)*adjbvec) ;
-		            	NLest_dwi(i,j,k,v) = abs(Lest_dwi(i,j,k,v) + real_noise(i,j,k,v) + img_noise(i,j,k,v)) ;
+			NLest_dwi(i,j,k,v) = abs(Lest_dwi(i,j,k,v) + real_noise(i,j,k,v) + img_noise(i,j,k,v)) ;
                         % Compute ADC 
                         %ADC = (log(Lest_dwi(i,j,k,v) / (b0_vol(i,j,k))) * (1 / (bv_b0 - ob)));
                         %fprintf('ADC corpt %f for volume %i\n',[ADC, v]);
@@ -164,14 +193,14 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
             end
         end
     end  
-    save('noise1.mat','real_noise','img_noise')
+    %save('noise1.mat','real_noise','img_noise')
     % Check if intended SNR is the actual SNR
     diff = Nest_dwi - est_dwi;
     diff = diff(mask_vol);
-    intended_snr =  mean_signal / std(diff)
+    intended_snr =  mean_signal / nanstd(diff)
     diff = NLest_dwi - Lest_dwi;
     diff = diff(mask_vol);
-    intended_snr =  mean_signal / std(diff)
+    intended_snr =  mean_signal / nanstd(diff)
 
     % Save signal esimated. b0 volume is added since it was not used for the computation
     %dwmri_est = zeros(size(dwmri_vols));
@@ -215,15 +244,15 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
     %nanmean(snr(mask_vol))
 
     dwmri_Nest = zeros(size(dwmri_vols));
-    dwmri_Nest(:,:,:,1) = b0_vol ;
-    dwmri_Nest(:,:,:,2:end) = Nest_dwi ;
+    dwmri_Nest(:,:,:,ind_b0) = all_b0_vol ;
+    dwmri_Nest(:,:,:,ind_non_b0) = Nest_dwi ;
     nii = load_untouch_nii(dwi_path);
     nii.img = dwmri_Nest;
     nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_est_sig']),nii,'double');
 
     dwmri_NLest = zeros(size(dwmri_vols));
-    dwmri_NLest(:,:,:,1) = b0_vol ;
-    dwmri_NLest(:,:,:,2:end) = NLest_dwi ;
+    dwmri_NLest(:,:,:,ind_b0) = all_b0_vol ;
+    dwmri_NLest(:,:,:,ind_non_b0) = NLest_dwi ;
     nii = load_untouch_nii(dwi_path);
     nii.img = dwmri_NLest;
     nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Lest_sig']),nii,'double');

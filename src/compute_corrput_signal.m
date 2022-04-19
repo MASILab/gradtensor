@@ -1,4 +1,4 @@
-function compute_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_name, rL_path, org_bvec_path, org_bval_path)
+function compute_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_name, L_path, org_bvec_path, org_bval_path)
     % compute_corrput_signal Computes signal with LR induced in it 
     %
     % Inputs
@@ -14,11 +14,43 @@ function compute_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path, out_
     
     % Load data
     dwmri_vols = nifti_utils.load_untouch_nii4D_vol_scaled(dwi_path,'double'); 
-    b0_vol = dwmri_vols(:,:,:,1);
-    dwi_vols = dwmri_vols(:,:,:,2:end);
+    % Load the original bvec and bval 
+    org_bvecs = importdata(org_bvec_path);
+    org_bvals = importdata(org_bval_path);
+    
+    % dwi and non-dwi
+    ind_b0 = find(~org_bvals);
+    ind_non_b0 = find(org_bvals);
+    
+    org_bvecs = org_bvecs(:,ind_non_b0);
+    org_bvals = org_bvals(ind_non_b0);
+    
+    all_b0_vol = dwmri_vols(:,:,:,ind_b0);
+    b0_vol = mean(all_b0_vol,4);
+    dwi_vols = dwmri_vols(:,:,:,ind_non_b0);
 
     % Load resampled L
-    VL = spm_vol(rL_path);
+    % Resample grad tensor to DTI image space
+    % Unzip
+    if strcmp(L_path(end-2:end),'.gz')
+        system(['gunzip -kf ' L_path]);
+        L_path = L_path(1:end-3);
+    end
+    flags = struct( ...
+        'mask',true, ...
+        'mean',false, ...
+        'interp',1, ...
+        'which',1, ...
+        'wrap',[0 0 0], ...
+        'prefix','r' ...
+        );
+    spm_reslice({dwi_path; L_path},flags);
+    [p,n,e] = fileparts(L_path);
+    rLimg_file = fullfile(p,['r' n e]);
+    movefile(rLimg_file,fullfile(out_dir,'L_resamp.nii'));
+    rLimg_file = fullfile(out_dir,'L_resamp.nii');
+
+    VL = spm_vol(rLimg_file);
     L = spm_read_vols(VL);
     nv = size(L,1);
     vL = zeros(3,3,size(L,1),size(L,2),size(L,3));
@@ -66,12 +98,6 @@ function compute_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path, out_
     % Volume 2 to end for bvec and bval
     bvec_vols = bvec_vols(:,:,:,2:end,:);
     bval_vols = bval_vols(:,:,:,2:end);
-    
-    % Load the original bvec and bval 
-    org_bvecs = importdata(org_bvec_path);
-    org_bvals = importdata(org_bval_path);
-    org_bvecs = org_bvecs(:,2:end);
-    org_bvals = org_bvals(2:end);
 
     % Initialize DT and exitcode volumes
     exitcode_vol = zeros(size(b0_vol));
@@ -88,14 +114,14 @@ function compute_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path, out_
                     % Get b0, dwi, bvecs and bvals               
                     b0 = b0_vol(i,j,k);
                     dwi = squeeze(dwi_vols(i,j,k,:))';
-                    bvecs = squeeze(bvec_vols(i,j,k,:,:))';
-                    bvals = squeeze(bval_vols(i,j,k,:))';
+                    %bvecs = squeeze(bvec_vols(i,j,k,:,:))';
+                    %bvals = squeeze(bval_vols(i,j,k,:))';
                     L_mat = squeeze(vL(:,:,i,j,k));
 
                     % Get linear model - use the corrected bvec and bval - considered as ground 
                     % truth tensor
-                    [DT_mat, exitcode] = linear_vox_fit(b0,dwi,bvecs,bvals);
-                    %[DT_mat, exitcode] = linear_vox_fit(b0,dwi,org_bvecs,org_bvals);
+                    %[DT_mat, exitcode] = linear_vox_fit(b0,dwi,bvecs,bvals);
+                    [DT_mat, exitcode] = linear_vox_fit(b0,dwi,org_bvecs,org_bvals);
                    
                     % Induce corrpution (script adpated from compute_b_images.m) and signal equation
                     for v = 1:length(org_bvals)
@@ -132,7 +158,7 @@ function compute_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path, out_
                         lenkeeps = len~=0;
                         ab(:,lenkeeps) = ab(:,lenkeeps) ./ repmat(len(lenkeeps),3,1);
                         adjbvec = ab;
-			adjbvec(1) = -adjbvec(1);
+                    	adjbvec(1) = -adjbvec(1);
                         
                         % Signal equation with adjected bvec and bval  
                         Lest_dwi(i,j,k,v) = b0_vol(i,j,k)*exp(-1*adjbval*adjbvec'*DT_mat(:,:)*adjbvec);
@@ -148,8 +174,8 @@ function compute_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path, out_
 
     % Save signal esimated. b0 volume is added since it was not used for the computation
     dwmri_est = zeros(size(dwmri_vols));
-    dwmri_est(:,:,:,1) = b0_vol ;
-    dwmri_est(:,:,:,2:end) = est_dwi ; 
+    dwmri_est(:,:,:,ind_b0) = all_b0_vol ;
+    dwmri_est(:,:,:,ind_non_b0) = est_dwi ; 
     nii = load_untouch_nii(dwi_path);
     nii.img = dwmri_est;
     nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_est_sig']),nii,'double');
@@ -164,8 +190,8 @@ function compute_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path, out_
    
     % Save the corrput signal estimated. b0 volume is added since it was not used for the computation
     dwmri_Lest = zeros(size(dwmri_vols));
-    dwmri_Lest(:,:,:,1) = b0_vol ;
-    dwmri_Lest(:,:,:,2:end) = Lest_dwi ;
+    dwmri_Lest(:,:,:,ind_b0) = all_b0_vol ;
+    dwmri_Lest(:,:,:,ind_non_b0) = Lest_dwi ;
     nii.img = dwmri_Lest;
     nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Lest_sig']),nii,'double');
 

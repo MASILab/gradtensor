@@ -10,15 +10,18 @@ addpath(genpath('../external/spm_reslice'))
 
 %gunzip('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/mask.nii.gz')
 
-dwi_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/BLSA_sm/Lest_corrected_sig.nii';
+%dwi_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_real_masiver/approx/real_sig.nii';
+dwi_path = '/home/local/VANDERBILT/kanakap/MASIVAR_LR_input1/sub-cIIs00_ses-s1Bx1_acq-b1000n32r25x25x25peAPP_run-112_dwi.nii';
 %bvec_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/INPUTS/dwmri.bvec';
 %bval_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/INPUTS/dwmri.bval';
 %mask_path = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/mask.nii';
-bvec_path = '/nfs/masi/kanakap/projects/LR/population_basis_study/data/Diffusion.bvecs';
-bval_path = '/nfs/masi/kanakap/projects/LR/population_basis_study/data/Diffusion.bvals';
-mask_path = '/nfs/masi/kanakap/projects/LR/population_basis_study/data/reg/dwi_mask.nii';
-out_dir = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/BLSA_sm/';
-out_name = 'Lest_corr_sm';
+bvec_path = '/home/local/VANDERBILT/kanakap/MASIVAR_LR_input1/sub-cIIs00_ses-s1Bx1_acq-b1000n32r25x25x25peAPP_run-112_dwi.bvec';
+bval_path = '/home/local/VANDERBILT/kanakap/MASIVAR_LR_input1/sub-cIIs00_ses-s1Bx1_acq-b1000n32r25x25x25peAPP_run-112_dwi.bval';
+mask_path = '';
+%out_dir = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_real_masiver';
+out_dir = '/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_d32_'
+%out_name = 'real_corr_sm';
+out_name = 'true_'
 
 %dti_voxel_fit(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_name);
 dti_voxel_fit_sig(dwi_path,bvec_path,bval_path,mask_path, out_dir, out_name);

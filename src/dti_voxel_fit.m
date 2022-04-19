@@ -83,6 +83,8 @@ function dti_voxel_fit(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_
     % Compute and save the MD, FA, PEV of the DTI
     MD = (eig_vol(:,:,:,1) + eig_vol(:,:,:,2) + eig_vol(:,:,:,3))./3;
     FA = sqrt(1/2) .* (sqrt( (eig_vol(:,:,:,1) - eig_vol(:,:,:,2)).^2 + (eig_vol(:,:,:,2) - eig_vol(:,:,:,3)).^2  + (eig_vol(:,:,:,3) - eig_vol(:,:,:,1)).^2 ) ./ sqrt(eig_vol(:,:,:,1).^2 + eig_vol(:,:,:,2).^2 + eig_vol(:,:,:,3).^2));
+    AD = eig_vol(:,:,:,1);
+    RD = (eig_vol(:,:,:,2) + eig_vol(:,:,:,3))./2; 
     nii = load_untouch_nii(dwi_path);
     nii.img = MD;
     nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_md']),nii,'double');
@@ -90,6 +92,8 @@ function dti_voxel_fit(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_
     nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_fa']),nii,'double');
     nii.img = primary_vec_vol;
     nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_primary_eigvec']),nii,'double');
-    
-    
+    nii.img = AD;
+     nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_ad']),nii,'double');
+    nii.img = RD;
+     nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_rd']),nii,'double');
 end
