@@ -6,46 +6,27 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import nmmn.plots
 parula=nmmn.plots.parulacmap() # for MATLAB's cmap
 
-"""
-true_fa = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_future_fieldmap/p_3tb_posA_mask_fa.nii').get_fdata()
-corpt_fa = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_estimates_study/Lest_fa.nii').get_fdata()
-sm_corr_fa = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/ISMRM_sm_study/Lest_corr_sm_fa.nii').get_fdata()
-bx_corr_fa = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/ISMRM_bx_study/Lest_corr_bx_fa.nii').get_fdata()
 
-true_md = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_future_fieldmap/p_3tb_posA_mask_md.nii').get_fdata()
-corpt_md = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_estimates_study/Lest_md.nii').get_fdata()
-sm_corr_md = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/ISMRM_sm_study/Lest_corr_sm_md.nii').get_fdata()
-bx_corr_md = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/ISMRM_bx_study/Lest_corr_bx_md.nii').get_fdata()
+true_fa = nib.load('/nfs/masi/kanakap/projects/LR/population_basis_study/data/reg/dwisubj2scanner_fa.nii').get_fdata()
+corpt_fa = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/BLSA_estimates/Lest_fa.nii').get_fdata()
+sm_corr_fa = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/BLSA_sm/Lest_corr_sm_fa.nii').get_fdata()
+bx_corr_fa = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/BLSA_bx/Lest_corr_bx_fa.nii').get_fdata()
 
-true_pev = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_future_fieldmap/p_3tb_posA_mask_primary_eigvec.nii').get_fdata()
-corpt_pev = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_estimates_study/Lest_primary_eigvec.nii').get_fdata()
-sm_corr_pev = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/ISMRM_sm_study/Lest_corr_sm_primary_eigvec.nii').get_fdata()
-bx_corr_pev = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/ISMRM_bx_study/Lest_corr_bx_primary_eigvec.nii').get_fdata()
+true_md = nib.load('/nfs/masi/kanakap/projects/LR/population_basis_study/data/reg/dwisubj2scanner_md.nii').get_fdata()
+corpt_md = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/BLSA_estimates/Lest_md.nii').get_fdata()
+sm_corr_md = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/BLSA_sm/Lest_corr_sm_md.nii').get_fdata()
+bx_corr_md = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/BLSA_bx/Lest_corr_bx_md.nii').get_fdata()
 
-true_fa = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_masiver/true__fa.nii').get_fdata()
-corpt_fa = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_masiver/masiver_fa.nii').get_fdata()
-sm_corr_fa = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_masiver/approx/Lest_corr_sm_fa.nii').get_fdata()
-bx_corr_fa = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_masiver/full/Lest_corr_bx_fa.nii').get_fdata()
+true_pev = nib.load('/nfs/masi/kanakap/projects/LR/population_basis_study/data/reg/dwisubj2scanner_primary_eigvec.nii').get_fdata()
+corpt_pev = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_estimates/Lest_primary_eigvec.nii').get_fdata()
+sm_corr_pev = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/BLSA_sm/Lest_corr_sm_primary_eigvec.nii').get_fdata()
+bx_corr_pev = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/BLSA_bx/Lest_corr_bx_primary_eigvec.nii').get_fdata()
 
-true_md = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_masiver/true__md.nii').get_fdata()
-corpt_md = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_masiver/masiver_md.nii').get_fdata()
-sm_corr_md = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_masiver/approx/Lest_corr_sm_md.nii').get_fdata()
-bx_corr_md = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_masiver/full/Lest_corr_bx_md.nii').get_fdata()
 
-true_pev = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_masiver/true__primary_eigvec.nii').get_fdata()
-corpt_pev = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_masiver/masiver_primary_eigvec.nii').get_fdata()
-sm_corr_pev = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_masiver/approx/Lest_corr_sm_primary_eigvec.nii').get_fdata()
-bx_corr_pev = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_masiver/full/Lest_corr_bx_primary_eigvec.nii').get_fdata()
-mask =  nib.load('/home/local/VANDERBILT/kanakap/mask.nii').get_fdata()
-"""
 
 plt.figure();
-slice_idx = 52
-mask = mask[slice_idx,:,:]
-mask = np.array(mask, dtype=bool)
-
-slice = true_fa[slice_idx,:,:]
-slice = np.where(mask, slice, 0)
+slice_idx = 45;
+slice = true_fa[:,slice_idx,:]
 m = 0
 M = 1
 slice = np.flip(np.rot90(slice,3))
@@ -61,7 +42,6 @@ a = plt.colorbar(im, cax=ax)
 
 corpt_change = abs(corpt_fa - true_fa);
 slice = corpt_change[:,slice_idx,:]
-slice = np.where(mask, slice, 0)
 m = 0
 M = 0.04
 slice = np.flip(np.rot90(slice,3))
@@ -78,7 +58,6 @@ a = plt.colorbar(im, cax=ax)
 
 sm_corr_change = abs(sm_corr_fa-true_fa);
 slice = sm_corr_change[:,slice_idx,:]
-slice = np.where(mask, slice, 0)
 m = 0
 M = 0.04
 slice = np.flip(np.rot90(slice,3))
@@ -95,7 +74,6 @@ a = plt.colorbar(im, cax=ax)
 
 bx_corr_change = abs(bx_corr_fa-true_fa);
 slice = bx_corr_change[:,slice_idx,:]
-slice = np.where(mask, slice, 0)
 m = 0
 M = 0.04
 slice = np.flip(np.rot90(slice,3))
@@ -110,8 +88,8 @@ divider = make_axes_locatable(plt.gca())
 ax = divider.append_axes("right", size="5%", pad=0.05)
 a = plt.colorbar(im, cax=ax)
 
-slice = true_md[slice_idx,:,:]
-slice = np.where(mask, slice, 0)
+
+slice = true_md[:,slice_idx,:]
 m = 0
 M = 0.003
 slice = np.flip(np.rot90(slice,3))
@@ -129,8 +107,7 @@ a.ax.tick_params(labelsize=12)
 a.set_label(u"\u03bcm2/s", size = 12)
 
 corpt_change = abs(corpt_md - true_md);
-slice = corpt_change[slice_idx,:,:]
-slice = np.where(mask, slice, 0)
+slice = corpt_change[:,slice_idx,:]
 m = 0
 M = 0.0003
 slice = np.flip(np.rot90(slice,3))
@@ -149,8 +126,7 @@ a.ax.tick_params(labelsize=12)
 a.set_label(u"\u03bcm2/s", size = 12)
 
 sm_corr_change = abs(sm_corr_md-true_md);
-slice = sm_corr_change[slice_idx,:,:]
-slice = np.where(mask, slice, 0)
+slice = sm_corr_change[:,slice_idx,:]
 m = 0
 M = 0.0003
 slice = np.flip(np.rot90(slice,3))
@@ -169,8 +145,7 @@ a.ax.tick_params(labelsize=12)
 a.set_label(u"\u03bcm2/s", size = 12)
 
 bx_corr_change = abs(bx_corr_md-true_md);
-slice = bx_corr_change[slice_idx,:,:]
-slice = np.where(mask, slice, 0)
+slice = bx_corr_change[:,slice_idx,:]
 m = 0
 M = 0.0003
 slice = np.flip(np.rot90(slice,3))
@@ -205,14 +180,7 @@ def angular_error_real(PEa, PEb, halfPi=True):
 
     return np.degrees(ang)
 
-#slice = true_pev[slice_idx,:,:]
-slice1 = true_pev[slice_idx,:,:,0]
-slice1 = np.where(mask, slice1, 0)
-slice2 = true_pev[slice_idx,:,:,1]
-slice2 = np.where(mask, slice2, 0)
-slice3 = true_pev[slice_idx,:,:,2]
-slice3 = np.where(mask, slice3, 0)
-slice = np.stack((slice1, slice2, slice3), axis=-1)
+slice = true_pev[:, slice_idx,:]
 m = 0
 M = 1
 slice = np.flip(np.rot90(slice,3))
@@ -230,7 +198,6 @@ a.set_label('degrees', size = 12)
 
 corpt_change = angular_error_real(corpt_pev,true_pev);
 slice = corpt_change[:, slice_idx,:]
-slice = np.where(mask, slice, 0)
 m = 0
 M = 5
 slice = np.flip(np.rot90(slice,3))
@@ -248,8 +215,7 @@ a.ax.tick_params(labelsize=12)
 a.set_label('degrees', size = 12)
 
 sm_corr_change = angular_error_real(sm_corr_pev,true_pev);
-slice = sm_corr_change[slice_idx,:,:]
-slice = np.where(mask, slice, 0)
+slice = sm_corr_change[:, slice_idx,:]
 m = 0
 M = 5
 slice = np.flip(np.rot90(slice,3))
@@ -267,8 +233,7 @@ a.ax.tick_params(labelsize=12)
 a.set_label('degrees', size = 12)
 
 bx_corr_change = angular_error_real(bx_corr_pev,true_pev);
-slice = bx_corr_change[slice_idx,:,:]
-slice = np.where(mask, slice, 0)
+slice = bx_corr_change[:, slice_idx,:]
 m = 0
 M = 5
 slice = np.flip(np.rot90(slice,3))

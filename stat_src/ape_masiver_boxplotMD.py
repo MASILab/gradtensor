@@ -8,31 +8,31 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import math
 
-true_fa =  nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_d32_/true__fa.nii').get_fdata()
+true_fa =  nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_d32_/true__md.nii').get_fdata()
 
-corpt_fa = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_d32_/uncorrected_fa.nii').get_fdata()
-sm_corr_fa = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_d32_/approx_corrected_fa.nii').get_fdata()
-bx_corr_fa = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_d32_/emp_corrected_fa.nii').get_fdata()
+corpt_fa = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_d32_/uncorrected_md.nii').get_fdata()
+sm_corr_fa = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_d32_/approx_corrected_md.nii').get_fdata()
+bx_corr_fa = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_d32_/emp_corrected_md.nii').get_fdata()
 
-corpt_fa100 = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR100_d32_1/uncorrected_fa.nii').get_fdata()
-sm_corr_fa100 = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR100_d32_1/approx_corrected_fa.nii').get_fdata()
-bx_corr_fa100 = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR100_d32_1/emp_corrected_fa.nii').get_fdata()
+corpt_fa100 = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR100_d32_1/uncorrected_md.nii').get_fdata()
+sm_corr_fa100 = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR100_d32_1/approx_corrected_md.nii').get_fdata()
+bx_corr_fa100 = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR100_d32_1/emp_corrected_md.nii').get_fdata()
 
-corpt_fa30 = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR30_d32_1/uncorrected_fa.nii').get_fdata()
-sm_corr_fa30 = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR30_d32_1/approx_corrected_fa.nii').get_fdata()
-bx_corr_fa30 = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR30_d32_1/emp_corrected_fa.nii').get_fdata()
+corpt_fa30 = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR30_d32_1/uncorrected_md.nii').get_fdata()
+sm_corr_fa30 = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR30_d32_1/approx_corrected_md.nii').get_fdata()
+bx_corr_fa30 = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR30_d32_1/emp_corrected_md.nii').get_fdata()
 
-corpt_fa10 = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR10_d32_1/uncorrected_fa.nii').get_fdata()
-sm_corr_fa10 = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR10_d32_1/approx_corrected_fa.nii').get_fdata()
-bx_corr_fa10 = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR10_d32_1/emp_corrected_fa.nii').get_fdata()
+corpt_fa10 = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR10_d32_1/uncorrected_md.nii').get_fdata()
+sm_corr_fa10 = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR10_d32_1/approx_corrected_md.nii').get_fdata()
+bx_corr_fa10 = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR10_d32_1/emp_corrected_md.nii').get_fdata()
 
 seg =  nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR100_d32_1/seg_reg_skull_stripped.nii.gz').get_fdata()
 
 # wm
 def plot_one_snr(corpt_fa,true_fa,snr):
     err_fa = corpt_fa - true_fa
-    pe_fa =  (err_fa / true_fa) * 100
-    ape_fa = np.abs(pe_fa)
+    ape_fa =  (abs(err_fa) / true_fa) * 100
+    #ape_fa = np.abs(pe_fa)
     ape_fa[np.isnan(ape_fa)] = 0
     ape_fa_csf = np.where(seg == 1, ape_fa , math.nan) # for csf 
     ape_fa_wm = np.where(seg == 3, ape_fa , math.nan) 
@@ -103,9 +103,9 @@ new_labels = [ ''.join(x) for x in zip(tick_labels[0::2], tick_labels[1::2]) ]
 
 plt.xticks(tick_locations, new_labels)
 
-plt.ylim([-1.3,200])
+plt.ylim([-10,75])
 plt.title('Effect of LR in different tissue at different SNR')
-plt.ylabel('APE FA = ( abs (Corr FA - GT FA) / GT FA ) * 100 (%)')
+plt.ylabel('APE MD = ( abs (Corr MD - GT MD) / GT MD ) * 100 (%)')
 plt.legend(loc='upper left')
 plt.show()
 

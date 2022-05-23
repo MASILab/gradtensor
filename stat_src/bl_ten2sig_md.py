@@ -4,11 +4,13 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 ten_raw = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/INPUTS/3_dwmri_md.nii').get_fdata()
-est = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_signal_estimate/3_posA_3tb_est_sig.nii').get_fdata()
+#est = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_signal_estimate/3_posA_3tb_est_sig.nii').get_fdata()
+est = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_masiver/BLSA_est_sig.nii').get_fdata()
 ten_est = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_signal_estimate/3_est_md.nii').get_fdata()
 
 ten_L = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_future_fieldmap/p_3tb_posA_mask_md.nii').get_fdata()
-Lest = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_signal_estimate/3_posA_3tb_Lest_sig.nii').get_fdata()
+#Lest = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_signal_estimate/3_posA_3tb_Lest_sig.nii').get_fdata()
+Lest = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_masiver/BLSA_Lest_sig.nii').get_fdata()
 ten_Lest = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_signal_estimate/3_Lest_md.nii').get_fdata()
 MD_est_d_uncorr = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_signal_estimate/3_Lest_og_ob_md.nii').get_fdata()
 MD_sm_d_corr = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_simple_method_est/2_inv_sm_md.nii').get_fdata()
@@ -17,13 +19,13 @@ MD_fy_corr = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019
 
 
 plt.figure()
-slice_idx = 45
+slice_idx = 52
 
 #simulated w no L
 est = est[:,:,:,15]
 slice = est[slice_idx,:,:]
-m = slice.max()
-M = slice.min()
+m = 0
+M = 100000
 slice = np.flip(np.rot90(slice,3))
 slice = np.nan_to_num(slice)
 plt.subplot(5,4,1)
@@ -81,8 +83,8 @@ plt.colorbar(im, cax=ax)
 #simulated w L
 Lest = Lest[:,:,:,15]
 slice = Lest[slice_idx,:,:]
-m = slice.min()
-M = slice.max()
+m = 0
+M = 100000
 slice = np.flip(np.rot90(slice,3))
 slice = np.nan_to_num(slice)
 plt.subplot(5,4,5)
@@ -266,11 +268,12 @@ ax = divider.append_axes("right", size="5%", pad=0.05)
 plt.colorbar(im, cax=ax)
 
 #diff in signal
-diff_sig = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_signal_estimate/3_posA_3tb_diff_sig.nii').get_fdata()
-diff_sig = diff_sig[:,:,:,15]
+#diff_sig = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_signal_estimate/3_posA_3tb_diff_sig.nii').get_fdata()
+#diff_sig = diff_sig[:,:,:,15]
+diff_sig = est - Lest
 slice = diff_sig[slice_idx,:,:]
-m = slice.min()
-M = slice.max()
+m = 0
+M = 3000
 slice = np.flip(np.rot90(slice,3))
 slice = np.nan_to_num(slice)
 plt.subplot(4,4,9)
