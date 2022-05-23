@@ -30,6 +30,7 @@ function [S_corpt, SS, abvec, abval] = ten_compute_corrput_signal(DT_mat, L_mat,
         ob = b(v);
 	
 	% Estimate signal
+	S(v) = b0*exp(-1*ob*og'*DT_mat(:,:)*og);
         SS(v) =  abs((b0*exp(-1*ob*og'*DT_mat(:,:)*og))+ real_noise(v) + img_noise(v));
         bv_b0 = 0;
         %ADC_SS = log(SS(v) / (b0)) * (1 / (bv_b0 - ob));

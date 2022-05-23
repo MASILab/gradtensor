@@ -1,4 +1,4 @@
-function [S_corpt, SS, abvec, abval] = ten_compute_corrput_signal(DT_mat, L_mat, g, b)
+function [S_corpt, SS, abvec, abval] = ten_compute_corrput_signal(DT_mat, L_mat, g, b, SNR)
     % ten_compute_corrput_signal Compute signal with gradient non-linear fields induced
     % Inputs
     % D_mat     diffusion tensor
@@ -20,13 +20,20 @@ function [S_corpt, SS, abvec, abval] = ten_compute_corrput_signal(DT_mat, L_mat,
     abvec = zeros(size(g));
     abval = zeros(size(b));
 
+    noise_std = 1 / SNR;
+    ndw_vol = length(b);
+    randn('state',sum(100*clock));
+    real_noise = noise_std * randn(1,ndw_vol);
+    img_noise = 1i * noise_std * randn(1,ndw_vol);
+
     % For all volumes
     for v = 1:length(b)
         og = g(:,v);
         ob = b(v);
 	
-	% Estimate signal
-        SS(v) =  b0*exp(-1*ob*og'*DT_mat(:,:)*og);
+        % Estimate signal
+        SS(v) =  abs((b0*exp(-1*ob*og'*DT_mat(:,:)*og)) + real_noise(v) + img_noise(v));
+        S(v) =  b0*exp(-1*ob*og'*DT_mat(:,:)*og);
         %bv_b0 = 0;
         %ADC_SS = log(SS(v) / (b0)) * (1 / (bv_b0 - ob));
         %fprintf('ADC no corpt %f for volume %i\n', [ADC_SS, v]);
@@ -54,8 +61,9 @@ function [S_corpt, SS, abvec, abval] = ten_compute_corrput_signal(DT_mat, L_mat,
 
         adjbvec(1) = -adjbvec(1);
 
-	    % Estimate LR induced signal
-        S_corpt(v) = b0*exp(-1*adjbval*adjbvec'*DT_mat(:,:)*adjbvec);
+        % Estimate LR induced signal
+        S_corpt(v) = abs((b0*exp(-1*adjbval*adjbvec'*DT_mat(:,:)*adjbvec)) + real_noise(v) + img_noise(v));
+        corpt(v) = b0*exp(-1*adjbval*adjbvec'*DT_mat(:,:)*adjbvec);
         %ADC_Scorpt = log(S_corpt(v) / (b0)) * (1 / (bv_b0 - ob));
         %fprintf('ADC corpt %f for volume %i\n', [ADC_Scorpt, v]);
 

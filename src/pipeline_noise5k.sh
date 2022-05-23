@@ -9,13 +9,15 @@ org_bvec_path=/home/local/VANDERBILT/kanakap/MASIVAR_LR_input1/sub-cIIs00_ses-s1
 org_bval_path=/home/local/VANDERBILT/kanakap/MASIVAR_LR_input1/sub-cIIs00_ses-s1Bx1_acq-b1000n32r25x25x25peAPP_run-112_dwi.bval
 mask_path=/home/local/VANDERBILT/kanakap/MASIVAR_LR_input1/mask.nii
 
-out_dir=/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR100_32_1
+out_dir=/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR10_d32_1
 #rL_path=/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_future_fieldmap/L_resamp.nii
 
 mkdir $out_dir
 uncorr_out_name=uncorrected
-initial_SNR=100
+est_uncorr_out_name=uncorrected_est
+initial_SNR=10
 uncorrected_sig=$out_dir/uncorrected_Lest_sig.nii
+est_uncorrected_sig=$out_dir/uncorrected_est_sig.nii
 
 Limg_file=/home/local/VANDERBILT/kanakap/gradtensor_data/fieldmaps/3tb_future_fieldmap/OUTPUTS/L.nii.gz
 refimg_file=$uncorrected_sig
@@ -24,7 +26,7 @@ approx_out_name=approx_corrected
 approx_corrected=$out_dir/approx_corrected_sig.nii
 
 # Reconstruct corrput signal
-~/MATLAB_2017a_install/bin/matlab -nodisplay -nosplash -nodesktop -r "disp('adding packages');addpath(genpath('/home/local/VANDERBILT/kanakap/gradtensor/external/spm_read_nii'));addpath(genpath('/home/local/VANDERBILT/kanakap/gradtensor/external/spm_reslice'));addpath('/home/local/VANDERBILT/kanakap/gradtensor/src/sh_basis');addpath('/nfs/masi/kanakap/xnat_apps/masimatab/trunk/xnatspiders/matlab/justinlib_v1_7_0/niftilib/');addpath('/home/local/VANDERBILT/kanakap/XNAT/TemporalLobe/revised_matlab_functions/');disp('Reconstruct corrput signal');compute_noise_corrput_signal('$dwi_path','$bvec_folder','$bval_folder','$mask_path','$out_dir','$uncorr_out_name','$Limg_file','$org_bvec_path','$org_bval_path',$initial_SNR);disp('Compute FA/MD/PEV of corrput signal');dti_voxel_fit_sig('$uncorrected_sig','$org_bvec_path','$org_bval_path','$mask_path','$out_dir','$uncorr_out_name');disp('Approximate correction');compute_approx_corr_dwi('$Limg_file','$refimg_file','$org_bval_path','$org_bvec_path','$mask_path','$approx_out_name','$out_dir'); disp('Compute FA/MD/PEV of approximate correction');dti_voxel_fit_sig('$approx_corrected','$org_bvec_path','$org_bval_path','$mask_path','$out_dir','$approx_out_name'); disp('Empirical correction');apply_gradtensor_to_b('Limg_file','$Limg_file','refimg_file','$refimg_file','bval_file','$org_bval_path','bvec_file','$org_bvec_path','out_dir','$out_dir');exit"
+~/MATLAB_2017a_install/bin/matlab -nodisplay -nosplash -nodesktop -r "disp('adding packages');addpath(genpath('/home/local/VANDERBILT/kanakap/gradtensor/external/spm_read_nii'));addpath(genpath('/home/local/VANDERBILT/kanakap/gradtensor/external/spm_reslice'));addpath('/home/local/VANDERBILT/kanakap/gradtensor/src/sh_basis');addpath('/nfs/masi/kanakap/xnat_apps/masimatab/trunk/xnatspiders/matlab/justinlib_v1_7_0/niftilib/');addpath('/home/local/VANDERBILT/kanakap/XNAT/TemporalLobe/revised_matlab_functions/');disp('Reconstruct corrput signal');compute_noise_corrput_signal('$dwi_path','$bvec_folder','$bval_folder','$mask_path','$out_dir','$uncorr_out_name','$Limg_file','$org_bvec_path','$org_bval_path',$initial_SNR);disp('Compute FA/MD/PEV of corrput signal');dti_voxel_fit_sig('$uncorrected_sig','$org_bvec_path','$org_bval_path','$mask_path','$out_dir','$uncorr_out_name');disp('Compute FA/MD/PEV of noise signal');dti_voxel_fit_sig('$est_uncorrected_sig','$org_bvec_path','$org_bval_path','$mask_path','$out_dir','$est_uncorr_out_name');disp('Approximate correction');compute_approx_corr_dwi('$Limg_file','$refimg_file','$org_bval_path','$org_bvec_path','$mask_path','$approx_out_name','$out_dir'); disp('Compute FA/MD/PEV of approximate correction');dti_voxel_fit_sig('$approx_corrected','$org_bvec_path','$org_bval_path','$mask_path','$out_dir','$approx_out_name'); disp('Empirical correction');apply_gradtensor_to_b('Limg_file','$Limg_file','refimg_file','$refimg_file','bval_file','$org_bval_path','bvec_file','$org_bvec_path','out_dir','$out_dir');exit"
 
 emp_bvec_folder=$out_dir/emp_corrected_bvec
 emp_bval_folder=$out_dir/emp_corrected_bval
