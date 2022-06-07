@@ -96,43 +96,43 @@ def violin_plot(metric):
         mL1 = [(np.round(s, 2)) for s in m1]
     return pd_data, mL1
 
-plt.figure(1)
+plt.subplots(3,1,figsize=(15,20))
 sns.set(font_scale = 1.3)
 sns.set_style("white")
 palette = {'Uncorrected SNR=inf': 'crimson', 'Uncorrected SNR=30': 'cornflowerblue', 'Emp corrected SNR=30': 'limegreen'}
 plt.subplot(3,1,1)
 fa_pd_data,mL1 = violin_plot('fa')
-ax = sns.violinplot(data=fa_pd_data, hue = 'label', x = 'x',y='Abs percent error (%)',dodge=False,width=.5,gridsize=1500,palette=palette)
+ax = sns.violinplot(data=fa_pd_data, hue = 'label', x = 'x',y='Abs percent error (%)',dodge=False,width=.5,gridsize=1500,palette=palette,inner="quart")
 ax.set_ylim([-10,100])
 ax.legend(loc='upper right')
 ax.set(xlabel=' ', ylabel = 'APE in FA (%)')
 for xtick in ax.get_xticks():
-    ax.text(xtick-.2,mL1[xtick] + ( mL1[xtick]*0.05),mL1[xtick],
+    ax.text(xtick-.3,mL1[xtick] + ( mL1[xtick]*0.05),mL1[xtick],
             horizontalalignment='center',size='x-small',color='k',weight='semibold')
 ax.set_xticklabels(['','noise FA - GT FA','','','noise+LR FA - GT FA','','','noise+LR FA - noise FA',''])
 plt.grid()
 
 plt.subplot(3,1,2)
 md_pd_data,mL1 = violin_plot('md')
-ax = sns.violinplot(data=md_pd_data, hue = 'label', x = 'x',y='Abs percent error (%)',dodge=False,width=.5,gridsize=1500,palette=palette)
+ax = sns.violinplot(data=md_pd_data, hue = 'label', x = 'x',y='Abs percent error (%)',dodge=False,width=.5,gridsize=10000,palette=palette,inner="quart")
 ax.set_ylim([-15,100])
 ax.get_legend().remove()
 ax.set(xlabel=' ', ylabel = 'APE in MD (%)')
 for xtick in ax.get_xticks():
-    ax.text(xtick-.2,mL1[xtick] + ( mL1[xtick]*0.05),mL1[xtick],
+    ax.text(xtick-.3,mL1[xtick] + ( mL1[xtick]*0.05),mL1[xtick],
             horizontalalignment='center',size='x-small',color='k',weight='semibold')
 ax.set_xticklabels(['','noise MD - GT MD','','','noise+LR MD - GT MD','','','noise+LR MD - noise MD',''])
 plt.grid()
 
 plt.subplot(3,1,3)
 v1_pd_data,mL1 = violin_plot('primary_eigvec')
-ax = sns.violinplot(data=v1_pd_data, hue = 'label', x = 'x',y='Abs percent error (%)',dodge=False,width=.5,gridsize=1500,palette=palette)
+ax = sns.violinplot(data=v1_pd_data, hue = 'label', x = 'x',y='Abs percent error (%)',dodge=False,width=.5,gridsize=1500,palette=palette,inner="quart")
 ax.set_ylim([-10,100])
 ax.set(xlabel=' ', ylabel = 'APE in V1 (degrees)')
 ax.get_legend().remove()
 
 for xtick in ax.get_xticks():
-    ax.text(xtick-.2,mL1[xtick] + ( mL1[xtick]*0.05),mL1[xtick],
+    ax.text(xtick-.3,mL1[xtick] + ( mL1[xtick]*0.05),mL1[xtick],
             horizontalalignment='center',size='x-small',color='k',weight='semibold')
 ax.set_xticklabels(['','noise PEV - GT PEV','','','noise+LR PEV - GT PEV','','','noise+LR PEV - noise PEV',''])
 
