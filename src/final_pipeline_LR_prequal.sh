@@ -8,8 +8,8 @@ dwi_path=/tmp/decompress/$2
 org_bvec_path=/nfs/masi/MASIver/data/production/MASiVar_PRODUCTION_v2.0.0/derivatives/prequal-v1.0.0/$1/dwi/$3
 org_bval_path=/nfs/masi/MASIver/data/production/MASiVar_PRODUCTION_v2.0.0/derivatives/prequal-v1.0.0/$1/dwi/$4
 #mask_path=/nfs/masi/kanakap/projects/LR/masivar_input/$4
-initial_SNR=$5
-out_dir=/nfs/masi/kanakap/projects/LR_tract/MASiVar_kids/$1/tracto_ip_$6_$7
+initial_SNR=inf
+out_dir=/nfs/masi/kanakap/projects/LR_tract/MASiVar_kids/$1/tracto_ip_$5_$6
 
 mkdir $out_dir
 uncorr_out_name=uncorrected
@@ -25,7 +25,22 @@ Limg_file=/home/local/VANDERBILT/kanakap/gradtensor_data/fieldmaps/3tb_future_fi
 # Reconstruct corrput signal
 ~/MATLAB_2017a_install/bin/matlab -nodisplay -nosplash -nodesktop -r "disp('adding packages');addpath(genpath('/home/local/VANDERBILT/kanakap/gradtensor/external/spm_read_nii'));addpath(genpath('/home/local/VANDERBILT/kanakap/gradtensor/external/spm_reslice'));addpath('/home/local/VANDERBILT/kanakap/gradtensor/src/sh_basis');addpath('/nfs/masi/kanakap/xnat_apps/masimatab/trunk/xnatspiders/matlab/justinlib_v1_7_0/niftilib/');addpath('/home/local/VANDERBILT/kanakap/XNAT/TemporalLobe/revised_matlab_functions/');disp('Reconstruct corrput signal');compute_noise_corrput_signal_v1('$dwi_path','$mask_path','$out_dir','$uncorr_out_name','$Limg_file','$org_bvec_path','$org_bval_path',$initial_SNR);disp('Compute FA/MD/PEV of LR+noise signal'); exit"
 
+# Make the input and output dir for Francois speical
 rm -r /tmp/decompress
 cp $org_bvec_path $out_dir
 cp $org_bval_path $out_dir
-ln -s /nfs/masi/kanakap/projects/LR_tract/MASiVar_kids/$1/anat/* $out_dir
+anat_dir=/nfs/masi/kanakap/projects/LR_tract/MASiVar_kids/$1/anat
+seg_dir=/nfs/masi/kanakap/projects/LR_tract/MASiVar_kids/$1/slant_output/FinalResult
+anat_file=$(ls $anat_dir)
+seg_file=$(ls $seg_dir)
+cp $anat_dir/* $out_dir
+cp $seg_dir/* $out_dir
+francois_out=/nfs/masi/kanakap/projects/LR_tract/MASiVar_kids/$1/tracto_op_$5_$6
+mkdir $francois_out
+gzip $out_dir/uncorrected_est_sig.nii
+
+# Francois speical command
+JOBDIR=/tmp/francois_$5_$6
+INDIR=$out_dir
+OUTDIR=$francois_out
+singularity run --home $JOBDIR --bind $JOBDIR:/tmp --containall --cleanenv --bind $INDIR:/INPUTS --bind $OUTDIR:/OUTPUTS --bind $JOBDIR:/TMP /nfs/masi/kanakap/singularity_francois_special_v1.sif $7 $8 $anat_file uncorrected_est_sig.nii.gz $4 $3 8 "0 $5" "0 $5" 1 wm 1 wm prob 27 0.4 20 $seg_file "4 40 41 44 45 51 52"
