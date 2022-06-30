@@ -1,10 +1,8 @@
-function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_name, L_path, org_bvec_path, org_bval_path, initial_SNR)
+function compute_noise_corrput_signal_v1(dwi_path,mask_path, out_dir, out_name, L_path, org_bvec_path, org_bval_path, initial_SNR)
     % compute_noise_corrput_signal Computes signal with LR and noise induced in it 
     %
     % Inputs
     %   dwi_path 	Path to the diffusion weighted nifti. Assumes b0 at first volume
-    %   bvec_folder 	Folder with the corrected voxel wise bvec files 
-    %   bval_folder 	Folder with the corrected voxel wise bval files
     %   mask_path 	Path to mask nifti (optional)
     %   out_dir 	Path to a directory in which to save metrics
     %   out_name 	Prefix to the generated metric nifti filenames
@@ -17,7 +15,7 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
     % Load the original bvec and bval
     org_bvecs = importdata(org_bvec_path);
     org_bvals = importdata(org_bval_path);
-
+    org_bvals = org_bvals';
     % dwi and non-dwi
     ind_b0 = find(~org_bvals);
     ind_non_b0 = find(org_bvals);
@@ -65,25 +63,6 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
     vL(3,3,:,:,:) = L(:,:,:,9);
     %save('L_mat','vL');
 
-    % Exctract nii and create cell array of bvec nifti paths
-    gunzip(fullfile(bvec_folder,'*.gz'))
-    bvec_paths_list = dir(fullfile(bvec_folder,'*.nii'));
-    bvec_paths = fullfile(bvec_folder, {bvec_paths_list.name});
-    
-    bvec_vols = [];
-    for i = 1:length(bvec_paths)
-        bvec_vols = cat(4,bvec_vols,permute(nifti_utils.load_untouch_nii_vol_scaled(bvec_paths{i},'double'),[1 2 3 5 4]));
-    end
-    
-    % Exctract nii and create cell array of bval nifti paths
-    gunzip(fullfile(bval_folder,'*.gz'))
-    bval_paths_list = dir(fullfile(bval_folder,'*.nii'));
-    bval_paths = fullfile(bval_folder, {bval_paths_list.name});
-    
-    bval_vols = [];
-    for i = 1:length(bval_paths)
-        bval_vols = cat(4,bval_vols,nifti_utils.load_untouch_nii_vol_scaled(bval_paths{i},'double'));
-    end
 
     % Load the mask nii file
     if ~exist('mask_path','var') || isempty(mask_path)
@@ -93,10 +72,6 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
         mask_vol = nifti_utils.load_untouch_nii_vol_scaled(mask_path,'double');
         mask_vol = logical(mask_vol);
     end
-    
-    % Volume 2 to end for bvec and bval
-    bvec_vols = bvec_vols(:,:,:,2:end,:);
-    bval_vols = bval_vols(:,:,:,2:end);
     
     % Initialize DT and exitcode volumes
     exitcode_vol = zeros(size(b0_vol));
@@ -140,8 +115,6 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
                     % Get b0, dwi, bvecs and bvals   
                     b0 = b0_vol(i,j,k);
                     dwi = squeeze(dwi_vols(i,j,k,:))';
-                    %bvecs = squeeze(bvec_vols(i,j,k,:,:))';
-                    %bvals = squeeze(bval_vols(i,j,k,:))';
                     L_mat = squeeze(vL(:,:,i,j,k));
 
                     % Get linear model - use the corrected bvec and bval - considered as ground 
@@ -214,26 +187,11 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
     diff = diff(mask_vol);
     intended_snr =  mean_signal / nanstd(diff)
 
-    % Save signal esimated. b0 volume is added since it was not used for the computation
-    %dwmri_est = zeros(size(dwmri_vols));
-    %dwmri_est(:,:,:,1) = b0_vol ;
-    %dwmri_est(:,:,:,2:end) = est_dwi ; 
-    %nii = load_untouch_nii(dwi_path);
-    %nii.img = dwmri_est;
-    %nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_est_sig']),nii,'double');
-    
-    % Difference in before and after corrput signal esimation
-    %Ldiff_est = abs(est_dwi - Lest_dwi);
-    %nii.img = Ldiff_est;
-    %nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Lest_est_diff']),nii,'double');
-    %Lnoise = std(Ldiff,0,4);
-    %snr = nanmean(est_dwi,4) ./ Lnoise;
-    %nanmean(snr(mask_vol))
-    
     dwmri_est = zeros(size(dwmri_vols));
     dwmri_est(:,:,:,ind_b0) = all_b0_vol ;
     dwmri_est(:,:,:,ind_non_b0) = est_dwi ;
     nii = load_untouch_nii(dwi_path);
+    dwmri_est(isnan(dwmri_est)) = 0;
     nii.img = dwmri_est;
     nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_est_sig']),nii,'double');
     
@@ -241,6 +199,7 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
     dwmri_Nest(:,:,:,ind_b0) = all_b0_vol ;
     dwmri_Nest(:,:,:,ind_non_b0) = Nest_dwi ;
     nii = load_untouch_nii(dwi_path);
+    dwmri_Nest(isnan(dwmri_Nest)) = 0;
     nii.img = dwmri_Nest;
     nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Nest_sig']),nii,'double');
 
@@ -248,6 +207,7 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
     dwmri_Lest(:,:,:,ind_b0) = all_b0_vol ;
     dwmri_Lest(:,:,:,ind_non_b0) = Lest_dwi ;
     nii = load_untouch_nii(dwi_path);
+    dwmri_Lest(isnan(dwmri_Lest)) = 0;
     nii.img = dwmri_Lest;
     nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_Lest_sig']),nii,'double');
 
@@ -255,6 +215,7 @@ function compute_noise_corrput_signal(dwi_path,bvec_folder,bval_folder,mask_path
     dwmri_NLest(:,:,:,ind_b0) = all_b0_vol ;
     dwmri_NLest(:,:,:,ind_non_b0) = NLest_dwi ;
     nii = load_untouch_nii(dwi_path);
+    dwmri_NLest(isnan(dwmri_NLest)) = 0;
     nii.img = dwmri_NLest;
     nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_NLest_sig']),nii,'double');
    

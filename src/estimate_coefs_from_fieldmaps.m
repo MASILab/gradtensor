@@ -117,7 +117,7 @@ XYZ = geomat' * XYZ;
 % Identify the voxels within image_radius from the origin that we will use
 % in the fit
 dsq = XYZ(1,:).^2 + XYZ(2,:).^2 + XYZ(3,:).^2;
-keeps = dsq' <= (image_radius ^ 2);
+keeps = dsq' <= (image_radius ^ 2); % pk
 
 
 % Fit for each coil

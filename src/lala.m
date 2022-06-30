@@ -1,6 +1,18 @@
- r_wm = '/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/reg_epi/repi_re_fast_wmseg.nii';
-rwm_mask = spm_vol(r_wm);
-rwm_mask = spm_read_vols(rwm_mask);
-rwm_mask(isnan(rwm_mask)) = 0;
-wm_mask = logical(rwm_mask);
-mean(b0(wm_mask))
+compute_approx_corr_dwi('/home/local/VANDERBILT/kanakap/gradtensor_data/fieldmaps/3tb_future_fieldmap/OUTPUTS_zero_grad/L.nii.gz','/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR30_d32_1_corr/uncorrected_Nest_sig.nii','/home/local/VANDERBILT/kanakap/MASIVAR_LR_input1/sub-cIIs00_ses-s1Bx1_acq-b1000n32r25x25x25peAPP_run-112_dwi.bval','/home/local/VANDERBILT/kanakap/MASIVAR_LR_input1/sub-cIIs00_ses-s1Bx1_acq-b1000n32r25x25x25peAPP_run-112_dwi.bvec','/home/local/VANDERBILT/kanakap/MASIVAR_LR_input1/mask.nii','approx_Ncorrected','/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR30_d32_1_corr')
+
+
+apply_gradtensor_to_b('Limg_file','/home/local/VANDERBILT/kanakap/gradtensor_data/fieldmaps/3tb_future_fieldmap/OUTPUTS_zero_grad/L.nii.gz','refimg_file','/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR30_d32_1_corr/uncorrected_Nest_sig.nii','bval_file','/home/local/VANDERBILT/kanakap/MASIVAR_LR_input1/sub-cIIs00_ses-s1Bx1_acq-b1000n32r25x25x25peAPP_run-112_dwi.bval','bvec_file','/home/local/VANDERBILT/kanakap/MASIVAR_LR_input1/sub-cIIs00_ses-s1Bx1_acq-b1000n32r25x25x25peAPP_run-112_dwi.bvec','out_dir','/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR30_d32_1_corr/Nemp')
+
+compute_noise_corrput_signal_v1('/nfs/masi/kanakap/projects/LR_tract/MASiVar_kids/sub-cIVs001/ses-s1Bx2/sub-cIVs001_ses-s1Bx2_acq-b1000b2000n96r21x21x22peAPP_run-1_dwi.nii.gz','','/nfs/masi/kanakap/projects/LR_tract/MASiVar_kids/sub-cIVs001/ses-s1Bx2/','test','/home/local/VANDERBILT/kanakap/gradtensor_data/fieldmaps/3tb_future_fieldmap/OUTPUTS/L.nii.gz','/nfs/masi/kanakap/projects/LR_tract/MASiVar_kids/sub-cIVs001/ses-s1Bx2/sub-cIVs001_ses-s1Bx2_acq-b1000b2000n96r21x21x22peAPP_run-1_dwi.bvec','/nfs/masi/kanakap/projects/LR_tract/MASiVar_kids/sub-cIVs001/ses-s1Bx2/sub-cIVs001_ses-s1Bx2_acq-b1000b2000n96r21x21x22peAPP_run-1_dwi.bval','inf');
+
+compute_noise_corrput_signal
+
+compute_noise_corrput_signal('/home/local/VANDERBILT/kanakap/MASIVAR_LR_input1/sub-cIIs00_ses-s1Bx1_acq-b1000n32r25x25x25peAPP_run-112_dwi.nii','/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_future_fieldmap/corrected_bvec/','/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_future_fieldmap/corrected_bval/','/home/local/VANDERBILT/kanakap/MASIVAR_LR_input1/mask.nii','/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNRinf_d32_1','uncorrected','/home/local/VANDERBILT/kanakap/gradtensor_data/fieldmaps/3tb_future_fieldmap/OUTPUTS/L.nii.gz','/home/local/VANDERBILT/kanakap/MASIVAR_LR_input1/sub-cIIs00_ses-s1Bx1_acq-b1000n32r25x25x25peAPP_run-112_dwi.bvec','/home/local/VANDERBILT/kanakap/MASIVAR_LR_input1/sub-cIIs00_ses-s1Bx1_acq-b1000n32r25x25x25peAPP_run-112_dwi.bval',inf)
+
+
+function dti_voxel_fit_sig(dwi_path,bvec_path,bval_path,mask_path, out_dir, out_name)
+dti_voxel_fit_sig('/nfs/masi/kanakap/projects/LR/masivar_input/1/sub-cIIs00_ses-s1Bx1_acq-b1000n32r25x25x25peAPP_run-112_dwi.nii','/nfs/masi/kanakap/projects/LR/masivar_input/1/sub-cIIs00_ses-s1Bx1_acq-b1000n32r25x25x25peAPP_run-112_dwi.bvec','/nfs/masi/kanakap/projects/LR/masivar_input/1/sub-cIIs00_ses-s1Bx1_acq-b1000n32r25x25x25peAPP_run-112_dwi.bval','/nfs/masi/kanakap/projects/LR/masivar_input/1/mask.nii','/nfs/masi/kanakap/projects/LR/masivar_input/1','true')
+
+dti_voxel_fit_sig('/nfs/masi/kanakap/projects/LR/masivar_input/10/sub-cIIIs01_ses-s1Bx1_acq-b1000n40r21x21x22peAPP_run-105_dwi.nii','/nfs/masi/kanakap/projects/LR/masivar_input/10/sub-cIIIs01_ses-s1Bx1_acq-b1000n40r21x21x22peAPP_run-105_dwi.bvec','/nfs/masi/kanakap/projects/LR/masivar_input/10/sub-cIIIs01_ses-s1Bx1_acq-b1000n40r21x21x22peAPP_run-105_dwi.bval','/nfs/masi/kanakap/projects/LR/masivar_input/10/mask.nii','/nfs/masi/kanakap/projects/LR/masivar_input/10/','true')
+
+dti_voxel_fit_sig('/nfs/masi/kanakap/projects/LR/masivar_input/11/sub-cIIs00_ses-s1Bx1_acq-b1000n96r25x25x25peAPP_run-109_dwi.nii','/nfs/masi/kanakap/projects/LR/masivar_input/11/sub-cIIs00_ses-s1Bx1_acq-b1000n96r25x25x25peAPP_run-109_dwi.bvec','/nfs/masi/kanakap/projects/LR/masivar_input/11/sub-cIIs00_ses-s1Bx1_acq-b1000n96r25x25x25peAPP_run-109_dwi.bval','/nfs/masi/kanakap/projects/LR/masivar_input/11/mask.nii','/nfs/masi/kanakap/projects/LR/masivar_input/11/','true')

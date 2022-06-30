@@ -16,6 +16,8 @@ def get_params():
                 p.append(la)
     final = ()
     for i in p:
+        print("************************************************************")
+        print(i)
         mbvalue = re.search('acq-b(.+?)n',i[10])
         bvalue = mbvalue.group(1)
         mrun = re.search('run-(.+?)_dwi',i[10])
@@ -23,11 +25,12 @@ def get_params():
         sub_sess = i[7]+'/'+i[8]
         sub = i[7]
         sess = i[8]
-        dwi = i[10]
+        dwi = i[10] + '.nii'
         bvec = i[10] + '.bvec'
         bval = i[10] + '.bval'
         a = (sub_sess, dwi, bval, bvec, bvalue, run, sub, sess)
-        subprocess.Popen(["bash","/home/local/VANDERBILT/kanakap/gradtensor/src/test1.sh", sub_sess, dwi, bval, bvec, bvalue, run, sub, sess]) 
+        proc = subprocess.Popen(["bash","/home/local/VANDERBILT/kanakap/gradtensor/src/final_pipeline_LR_prequal.sh", sub_sess, dwi, bval, bvec, bvalue, run, sub, sess]) 
+        proc.wait()
 get_params()
 
 

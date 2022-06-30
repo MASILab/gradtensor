@@ -1,4 +1,4 @@
-function dti_voxel_fit(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_name,bval_file,bvec_file)
+function dti_voxel_fit_masiver(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_name,bval_file,bvec_file)
     % dti_voxel_fit Performs linear DTI fit given input bfields. Note that only symmetric 
     % constraint is applied. Positive definiteness is not enforced. 
     %
@@ -78,21 +78,33 @@ function dti_voxel_fit(dwi_path,bvec_folder,bval_folder,mask_path, out_dir, out_
                         %DT_rot_lest_corr_bx_posB(:,:,i,j,k) = DT_mat(:,:);
                     	[v, e] = eig(DT_mat);
                     	e = diag(e);
-                    	[max_eig, pos] = max(e);
+                        if max(e) == min(e)
+                            [max_eig, pos] = max(e);
+                            
+                            min_eig = e(2);
+                            sec_eig = e(3);
+                            
+                            primary = v(:,pos);	
+                            eig_vol(i,j,k,:) = e;
+                            primary_vec_vol(i,j,k,:) = primary;
 
-                        [min_eig, ter_pos] = min(e);
-                        possible_positions = [1 2 3];
-                        not_max = possible_positions(possible_positions~=pos);
-                        sec_pos = not_max(not_max~=ter_pos);
-                        sec_eig = e(sec_pos);
-			
-                    	primary = v(:,pos);	
-                    	eig_vol(i,j,k,:) = e;
-                        primary_vec_vol(i,j,k,:) = primary;
+                            AD(i,j,k) = max_eig;
+                            RD(i,j,k) = (min_eig + sec_eig) / 2;
+                        else
+                            [max_eig, pos] = max(e);
+                            [min_eig, ter_pos] = min(e);
+                            possible_positions = [1 2 3];
+                            not_max = possible_positions(possible_positions~=pos);
+                            sec_pos = not_max(not_max~=ter_pos);
+                            sec_eig = e(sec_pos);
 
-                        AD(i,j,k) = max_eig;
-                        RD(i,j,k) = (min_eig + sec_eig) / 2;
+                            primary = v(:,pos);	
+                            eig_vol(i,j,k,:) = e;
+                            primary_vec_vol(i,j,k,:) = primary;
 
+                            AD(i,j,k) = max_eig;
+                            RD(i,j,k) = (min_eig + sec_eig) / 2;
+                        end
                         exitcode_vol(i,j,k) = exitcode;
                     end
                 end

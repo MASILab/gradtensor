@@ -1,7 +1,7 @@
 function run_ten_sim(bvec_file,bval_file,SNR,suf_name)
     % FA/MD/PEV after and before gradient non-linear fields in Tensor simulation
     MD = 0.0008;
-    n = 100;
+    n = 50;
     nv = 19406;
 
     % bval and bvec
@@ -78,7 +78,6 @@ function run_ten_sim(bvec_file,bval_file,SNR,suf_name)
     load('phi_sphere100.mat');
     load('vertices_sphere100.mat');
     idx = 0;
-    tic
     for i = 1:nv
         particle_cord = vertices(i, :);
         for p = 1:n
@@ -159,7 +158,7 @@ function run_ten_sim(bvec_file,bval_file,SNR,suf_name)
 
                 %noise
                 % DT fit corpt signal
-                [D_sim_noise, exitcode] = linear_vox_fit(1,S,g, b);
+                [D_sim_noise, exitcode] = linear_vox_fit(1,S,g,b);
                 % Compute FA + MD + PEV after corrpution
                 FA_sim_noise = compute_FA(D_sim_noise);
                 FA_sim_noise_x(idx) =   FA_sim_noise;
@@ -173,7 +172,8 @@ function run_ten_sim(bvec_file,bval_file,SNR,suf_name)
                 PEV_sim_noise_x(idx,:) =   PEV_sim_noise;
 
                 % DT fit full corrected with adjected bvec and adjected bval
-                [D_corr_noise_bx, exitcode] =  linear_vox_fit(1,S,abvec, abval);
+		[abvec_noise, abval_noise] = ten_compute_emp_noise_LR(g,b);
+                [D_corr_noise_bx, exitcode] =  linear_vox_fit(1,S,abvec_noise, abval_noise);
                 % compute_ADC_(D_corr_bx, g, b);
                 % FA + MD + PVE full correction method
                 FA_corr_noise_bx = compute_FA(D_corr_noise_bx);
@@ -188,7 +188,7 @@ function run_ten_sim(bvec_file,bval_file,SNR,suf_name)
                 PEV_corr_noise_bx_x(idx,:) = PEV_corr_noise_bx;
 
                 % Compute new signal with scaling the bvec + DT fit
-                new_dwi_signal = ten_compute_approx_corr(S,g,b,L_mat);
+                new_dwi_signal = ten_compute_noise_approx_corr(S,g,b);
                 [D_corr_noise_sm_fy, exitcode] = linear_vox_fit(1,new_dwi_signal,g, b);
                 % FA + MD + PVE approximate correction method
                 FA_corr_noise_sm_fy = compute_FA(D_corr_noise_sm_fy);
@@ -202,13 +202,12 @@ function run_ten_sim(bvec_file,bval_file,SNR,suf_name)
                 PEV_corr_noise_sm_fy = compute_primary_eigvec(D_corr_noise_sm_fy);
                 PEV_corr_noise_sm_fy_x(idx,:) =  PEV_corr_noise_sm_fy;
 
-                if mod(idx,13881200)==0
+                if mod(idx,24257500)==0
                     save("/nfs/masi/kanakap/projects/LR/ten_sim/CorrectionLReffectsresults_"+ suf_name + "_" + int2str(idx) +".mat",'-v7.3');
                 end
             end
         end
     end
-    toc
     save("/nfs/masi/kanakap/projects/LR/ten_sim/CorrectionLReffectsresults_"+ suf_name  + ".mat",'-v7.3');
 end
 
