@@ -116,13 +116,6 @@ def violin_plot(metric):
 
         alr_noise10 = plot_one_snr(corpt_fa10,true_fa,'Uncorrected','app_10')
         acorr_lr10 = plot_one_snr(sm_corr_fa10,noise_fa10,'Approx Corrected','app_10')
-        #pd_data = pd.concat([lr_noiseinf, lr_noise100, lr_noise30, lr_noise10, corr_lrinf, corr_lr100, corr_lr30, corr_lr10, alr_noiseinf, alr_noise100, alr_noise30, alr_noise10, acorr_lrinf, acorr_lr100, acorr_lr30, acorr_lr10])
-
-        #pd_data = pd_data.melt(id_vars=['label'], value_vars=['emp_inf','emp_100','emp_30','emp_10','app_inf','app_100','app_30','app_10'],var_name='H', value_name='value')
-        pd_data = pd.concat([lr_noiseinf, lr_noise100, lr_noise30, lr_noise10, corr_lrinf, corr_lr100, corr_lr30, corr_lr10])
-        pd_data = pd_data.melt(id_vars=['label'], value_vars=['emp_inf','emp_100','emp_30','emp_10'],var_name='H', value_name='value')
-        apd_data = pd.concat([alr_noiseinf, alr_noise100, alr_noise30, alr_noise10, acorr_lrinf, acorr_lr100, acorr_lr30, acorr_lr10])
-        apd_data = apd_data.melt(id_vars=['label'], value_vars=['app_inf','app_100','app_30','app_10'],var_name='H', value_name='value')
 
     else:
         lr_noiseinf = plot_one_snr_pev(corpt_fainf,true_fa,'Uncorrected','emp_inf')
@@ -148,93 +141,30 @@ def violin_plot(metric):
 
         alr_noise10 = plot_one_snr_pev(corpt_fa10,true_fa,'Uncorrected','app_10')
         acorr_lr10 = plot_one_snr_pev(sm_corr_fa10,noise_fa10,'Approx Corrected','app_10')
-        #pd_data = pd.concat([lr_noiseinf, lr_noise100, lr_noise30, lr_noise10, corr_lrinf, corr_lr100, corr_lr30, corr_lr10, alr_noiseinf, alr_noise100, alr_noise30, alr_noise10, acorr_lrinf, acorr_lr100, acorr_lr30, acorr_lr10])
-        #pd_data = pd_data.melt(id_vars=['label'], value_vars=['emp_inf','emp_100','emp_30','emp_10','app_inf','app_100','app_30','app_10'],var_name='H', value_name='value')
-        pd_data = pd.concat([lr_noiseinf, lr_noise100, lr_noise30, lr_noise10, corr_lrinf, corr_lr100, corr_lr30, corr_lr10])
-        pd_data = pd_data.melt(id_vars=['label'], value_vars=['emp_inf','emp_100','emp_30','emp_10'],var_name='H', value_name='value')
-        apd_data = pd.concat([alr_noiseinf, alr_noise100, alr_noise30, alr_noise10, acorr_lrinf, acorr_lr100, acorr_lr30, acorr_lr10])
-        apd_data = apd_data.melt(id_vars=['label'], value_vars=['app_inf','app_100','app_30','app_10'],var_name='H', value_name='value')
-    return pd_data,apd_data
+    return lr_noiseinf, lr_noise100, lr_noise30, lr_noise10, corr_lrinf, corr_lr100, corr_lr30, corr_lr10, alr_noiseinf, alr_noise100, alr_noise30, alr_noise10, acorr_lrinf, acorr_lr100, acorr_lr30, acorr_lr10
 
-plt.subplots(3,2,figsize=(15,20))
-sns.set(font_scale = 1.3)
-sns.set_style("white")
-palette = {'Uncorrected': 'crimson', 'Emp Corrected': 'limegreen'}
-fa_pd_data,fa_apd_data = violin_plot('fa')
-plt.subplot(3,2,1)
-ax = sns.violinplot(data=fa_pd_data, hue = 'label', x = 'H',y='value',split=True,dodge=False,linewidth=2,scale="width",inner=None,palette=palette,gridsize=10000,bw=0.02)
-#ax.set_ylim([-10,100])
-ax.set_ylim([-1,3])
-ax.legend(loc='upper right')
-split_voilin()
-ax.set_xlabel(' ',fontsize=15)
-ax.set_ylabel('APE in FA (%)',fontsize=15)
-ax.set_xticklabels(['Inf','100','30','10'])
-plt.grid()
+lr_noiseinf, lr_noise100, lr_noise30, lr_noise10, corr_lrinf, corr_lr100, corr_lr30, corr_lr10, alr_noiseinf, alr_noise100, alr_noise30, alr_noise10, acorr_lrinf, acorr_lr100, acorr_lr30, acorr_lr10 = violin_plot('fa')
+def cohens_d(c1,c0):
+    cohens_d = (mean(c0) - mean(c1)) / (sqrt((stdev(c0) ** 2 + stdev(c1) ** 2) / 2))
+    return cohens_d
 
-plt.subplot(3,2,2)
-palette = {'Uncorrected': 'crimson', 'Approx Corrected': 'cornflowerblue'}
-ax = sns.violinplot(data=fa_apd_data, hue = 'label', x = 'H',y='value',split=True,dodge=False,linewidth=2,scale="width",inner=None,palette=palette,gridsize=10000,bw=0.02)
-#ax.set_ylim([-10,100])
-ax.set_ylim([-1,3])
-ax.legend(loc='upper right')
-split_voilin()
-ax.set_xlabel(' ',fontsize=15)
-ax.set_ylabel(' ',fontsize=15)
-ax.set_xticklabels(['Inf','100','30','10'])
-plt.grid()
+def run_cohens_d(m):
+    lr_noiseinf, lr_noise100, lr_noise30, lr_noise10, corr_lrinf, corr_lr100, corr_lr30, corr_lr10, alr_noiseinf, alr_noise100, alr_noise30, alr_noise10, acorr_lrinf, acorr_lr100, acorr_lr30, acorr_lr10 = violin_plot(m)
 
-plt.subplot(3,2,3)
-palette = {'Uncorrected': 'crimson', 'Emp Corrected': 'limegreen'}
-md_pd_data, md_apd_data = violin_plot('md')
-ax = sns.violinplot(data=md_pd_data, hue = 'label', x = 'H',y='value',split=True,dodge=False,linewidth=2,scale="width",inner=None,palette=palette,gridsize=50000,bw=0.02) #0.04
-#ax.set_ylim([-10,100])
-ax.set_ylim([-1,3])
-ax.get_legend().remove()
-split_voilin()
-ax.set_xlabel(' ',fontsize=15)
-ax.set_ylabel('APE in MD (%)',fontsize=15)
-ax.set_xticklabels(['Inf','100','30','10'])
-plt.grid()
+    corpt_emp_inf = cohens_d(lr_noiseinf['emp_inf'],corr_lrinf['emp_inf'])
+    corpt_emp_100 = cohens_d(lr_noise100['emp_100'],corr_lr100['emp_100'])
+    corpt_emp_30 = cohens_dlr_noise30['emp_30'],corr_lr30['emp_30'])
+    corpt_emp_10 = cohens_d(lr_noise10['emp_10'],corr_lr10['emp_10'])
 
-plt.subplot(3,2,4)
-palette = {'Uncorrected': 'crimson', 'Approx Corrected': 'cornflowerblue'}
-ax = sns.violinplot(data=md_apd_data, hue = 'label', x = 'H',y='value',split=True,dodge=False,linewidth=2,scale="width",inner=None,palette=palette,gridsize=50000,bw=0.02)
-#ax.set_ylim([-10,100])
-ax.set_ylim([-1,3])
-ax.get_legend().remove()
-split_voilin()
-ax.set_xlabel(' ',fontsize=15)
-ax.set_ylabel(' ',fontsize=15)
-ax.set_xticklabels(['Inf','100','30','10'])
-plt.grid()
+    corpt_app_inf = cohens_d(lr_noiseinf['emp_inf'],acorr_lrinf['app_inf'])
+    corpt_app_100 = cohens_d(lr_noise100['emp_100'],acorr_lr100['app_100'])
+    corpt_app_30 = cohens_d(lr_noise30['emp_30'],acorr_lr30['app_30'])
+    corpt_app_10 = cohens_d(lr_noise10['emp_10'],acorr_lr10['app_10'])
 
-plt.subplot(3,2,5)
-palette = {'Uncorrected': 'crimson', 'Emp Corrected': 'limegreen'}
-v1_pd_data, v1_apd_data = violin_plot('primary_eigvec')
-ax = sns.violinplot(data=v1_pd_data, hue = 'label', x = 'H',y='value',split=True,dodge=False,linewidth=2,scale="width",inner=None,palette=palette,gridsize=50000,bw=0.04)
-#ax.set_ylim([-10,100])
-ax.set_ylim([-1,3])
-ax.get_legend().remove()
-split_voilin()
-ax.set_xlabel(' ',fontsize=15)
-ax.set_ylabel('APE in PEV (%)',fontsize=15)
-ax.set_xticklabels(['Inf','100','30','10'])
-plt.grid()  
+    emp_app_inf = cohens_d(corr_lrinf['emp_inf'],acorr_lrinf['app_inf'])
+    emp_app_100 = cohens_d(corr_lr100['emp_100'],acorr_lr100['app_100'])
+    emp_app_30 = cohens_d(corr_lr30['emp_30'],acorr_lr30['app_30'])
+    emp_app_10 = cohens_d(corr_lr10['emp_10'],acorr_lr10['app_10'])
+    print(corpt_emp_inf,corpt_emp_100,corpt_emp_30,corpt_emp_10,corpt_app_inf,corpt_app_100,corpt_app_30,corpt_app_10,emp_app_inf,emp_app_100,emp_app_30,emp_app_10)
 
-plt.subplot(3,2,6)
-palette = {'Uncorrected': 'crimson', 'Approx Corrected': 'cornflowerblue'}
-ax = sns.violinplot(data=v1_apd_data, hue = 'label', x = 'H',y='value',split=True,dodge=False,linewidth=2,scale="width",inner=None,palette=palette,gridsize=50000,bw=0.04)
-#ax.set_ylim([-10,100])
-ax.set_ylim([-1,3])
-ax.get_legend().remove()
-split_voilin()
-ax.set_xlabel(' ',fontsize=15)
-ax.set_ylabel(' ',fontsize=15)
-ax.set_xticklabels(['Inf','100','30','10'])
-plt.grid()
-
-
-
-plt.tight_layout()
-plt.show()
+run_cohens_d(sys.args[1])

@@ -8,10 +8,18 @@ import xml.etree.cElementTree as et
 import pandas as pd
 import scipy.io as sio
 
-MD_Lest = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_estimates_study/Lest_primary_eigvec.nii').get_fdata()
-MD_true = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_future_fieldmap/p_3tb_posA_mask_primary_eigvec.nii').get_fdata()
-atlas_img = nib.load('/home-nfs2/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/slantatlas2subj.nii.gz')
+#MD_Lest = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_estimates_study/Lest_primary_eigvec.nii').get_fdata()
+#MD_true = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_future_fieldmap/p_3tb_posA_mask_primary_eigvec.nii').get_fdata()
+
+MD_Lest = nib.load('/nfs/masi/kanakap/projects/LR/masivar_output/SNRinf_d32_1/uncorrected_primary_eigvec.nii').get_fdata()
+#MD_Lest = nib.load('/nfs/masi/kanakap/projects/LR/masivar_output/SNRinf_d32_1/emp/emp_corrected_primary_eigvec.nii').get_fdata()
+#MD_Lest = nib.load('/nfs/masi/kanakap/projects/LR/masivar_output/SNRinf_d32_1/approx_corrected_primary_eigvec.nii').get_fdata()
+MD_true = nib.load('/nfs/masi/kanakap/projects/LR/masivar_input/1/true_primary_eigvec.nii').get_fdata()
+
+atlas_img = nib.load('/nfs/masi/kanakap/projects/LR/masivar_input/1/slant2subj.nii.gz')
 atlas = atlas_img.get_fdata()
+t1_seg = nib.load('/nfs/masi/kanakap/projects/LR/masivar_input/1/slant_output/FinalResult/sub-cIIs00_ses-s1Bx1_acq-r10x10x10_T1w_seg.nii.gz')
+t1_seg_img = t1_seg.get_fdata()
 LR = sio.loadmat('../src/LRfield_posA.mat')
 vL = LR['vL']
 
@@ -26,8 +34,9 @@ def angular_error(PEa, PEb, halfPi=True):
     ang = 2 * np.real(np.arcsin(chord/2))
 
     if halfPi:
+        print(ang)
         ang[ang > (np.pi/2)] = np.pi - ang[ang > (np.pi/2)]
-
+        print(ang)
     return np.degrees(ang)
 
 ang_error = angular_error(MD_Lest,MD_true,halfPi=True)
@@ -38,9 +47,9 @@ alldiff = []
 L_det_roi = []
 allL_det = {}
 for i in range(1,208):
-    for x in range(96):
-        for y in range(96):
-            for z in range(68):
+    for x in range(MD_true.shape[0]):
+        for y in range(MD_true.shape[1]):
+            for z in range(MD_true.shape[2]):
                 if atlas[x,y,z] == i:
                      diff = ang_error[x,y,z]
                      alldiff.append(diff)
@@ -55,18 +64,18 @@ for i in range(1,208):
         alldiff = []
         allL_det[i] = L_det_roi
         L_det_roi=[]
-print(np.nanmean(allalldiff))
+#print(np.nanmean(allalldiff))
 
 # get the avg of MD diff and change the label no to that
 avg_md_diff_labels = {}
 for k,v in MD_diff.items():
     # v is the list of grades for student k
     avg_md_diff_labels[k] = sum(v)/ float(len(v))
-MD_diff_atlas = atlas.copy()
-MD_diff_atlas[MD_diff_atlas == 0.0] = np.nan
+MD_diff_atlas = t1_seg_img.copy()
+#MD_diff_atlas[MD_diff_atlas == 0.0] = np.nan
 for i in avg_md_diff_labels.keys():
     MD_diff_atlas[MD_diff_atlas == i] = avg_md_diff_labels[i]
-nib.save(nib.Nifti1Image(MD_diff_atlas,atlas_img.affine),'/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/ISMRM_corpt/PEVdiff_avg_gmlabels.nii.gz')
+#nib.save(nib.Nifti1Image(MD_diff_atlas,t1_seg.affine),'/nfs/masi/kanakap/projects/LR/masivar_output/SNRinf_d32_1/v1_diff_gm_seg.nii.gz')
 
 # change key to roi names
 filename = '/nfs/masi/hansencb/10_29_2019_human_repositioned/3tb/posA/slant/OUTPUTS/FinalVolTxt/T1_label_volumes.txt'
@@ -97,7 +106,9 @@ print(sorted_Ldet_mean.values())
 df = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in MD_diff.items() ]))
 sorted_index = df.median().sort_values().index
 df_sorted=df[sorted_index]
-
+dfmean = round(df.mean(),4)
+#dfmean.to_csv('/nfs/masi/kanakap/projects/LR/masivar_output/SNRinf_d32_1/v1_gm.csv')
+"""
 #labels, data = MD_diff.keys(), MD_diff.values()
 #sns.set(rc={'figure.figsize':(11.7,50.27)})
 fig1 = plt.figure(num=1,figsize=(40,40))
@@ -120,7 +131,7 @@ plt.subplots_adjust(left=0.045, bottom=0.385, right=0.995, top=0.955, wspace=0, 
 
 plt.title('Corruption of GM regions of MR scan at isocenter - sorted by LRfield')
 plt.show()
-
+"""
 
 
 

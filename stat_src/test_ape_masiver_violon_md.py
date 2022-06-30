@@ -8,25 +8,25 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import math
 
-true_fa =  nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_d32_/true__fa.nii').get_fdata()
-corpt_fa = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR30_d32_1_corr/uncorrected_fa.nii').get_fdata()
-noise_fa = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR30_d32_1_corr/uncorrected_Nest_fa.nii').get_fdata()
-lcorpt_fa = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR30_d32_1_corr/uncorrected_Lest_fa.nii').get_fdata()
-mask = nib.load('/home/local/VANDERBILT/kanakap/MASIVAR_LR_input1/mask.nii').get_fdata()
+true_fa =  nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_d32_/true__md.nii').get_fdata()
+corpt_fa = nib.load('/nfs/masi/kanakap/projects/LR/masivar_output/SNR30_d32_1/uncorrected_md.nii').get_fdata()
+noise_fa = nib.load('/nfs/masi/kanakap/projects/LR/masivar_output/SNR30_d32_1/uncorrected_Nest_md.nii').get_fdata()
+lcorpt_fa = nib.load('/nfs/masi/kanakap/projects/LR/masivar_output/SNR30_d32_1/uncorrected_Lest_md.nii').get_fdata()
+#mask = nib.load('/home/local/VANDERBILT/kanakap/MASIVAR_LR_input1/mask.nii').get_fdata()
+mask = nib.load('/nfs/masi/kanakap/projects/LR/masivar_input/1/mask.nii').get_fdata()
 
-inf_corpt_fa = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNRinf_d32_1/uncorrected_fa.nii').get_fdata()
-inf_noise_fa = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNRinf_d32_1/uncorrected_Nest_fa.nii').get_fdata()
+inf_corpt_fa = nib.load('/nfs/masi/kanakap/projects/LR/masivar_output/SNRinf_d32_1/uncorrected_md.nii').get_fdata()
+inf_noise_fa = nib.load('/nfs/masi/kanakap/projects/LR/masivar_output/SNRinf_d32_1/uncorrected_Nest_md.nii').get_fdata()
 
-sm_corr_fa = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR30_d32_1_corr/approx_corrected_fa.nii').get_fdata()
-Nsm_corr_fa = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR30_d32_1_corr/approx_Ncorrected_fa.nii').get_fdata()
-bx_corr_fa = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR30_d32_1_corr/emp/emp_corrected_fa.nii').get_fdata()
-Nbx_corr_fa = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNR30_d32_1_corr/Nemp/Nemp_corrected_fa.nii').get_fdata()
+sm_corr_fa = nib.load('/nfs/masi/kanakap/projects/LR/masivar_output/SNR30_d32_1/approx_corrected_md.nii').get_fdata()
+Nsm_corr_fa = nib.load('/nfs/masi/kanakap/projects/LR/masivar_output/SNR30_d32_1/approx_Ncorrected_md.nii').get_fdata()
+bx_corr_fa = nib.load('/nfs/masi/kanakap/projects/LR/masivar_output/SNR30_d32_1/emp/emp_corrected_md.nii').get_fdata()
+Nbx_corr_fa = nib.load('/nfs/masi/kanakap/projects/LR/masivar_output/SNR30_d32_1/Nemp/Nemp_corrected_md.nii').get_fdata()
 #Nbx_corr_fa = nib.load('/home/local/VANDERBILT/kanakap/test_noise/test_fa.nii').get_fdata()
 #Nbx_corr_fa_inf = nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_SNRinf_d32_1/Nemp/Nemp_corrected_fa.nii').get_fdata()
 
+
 def plot_one_snr(corpt_fa,true_fa,label,x):
-    #corpt_fa[np.isnan(corpt_fa)] = 0 
-    #true_fa[np.isnan(true_fa)] = 0
     err_fa = corpt_fa - true_fa
     pe_fa =  (err_fa / true_fa) * 100
     ape_fa = np.abs(pe_fa)
@@ -50,21 +50,16 @@ lr,mlr =  plot_one_snr(corpt_fa,noise_fa,'Uncorrected SNR=30','lr')
 corr_noise,mcorr_noise= plot_one_snr(Nbx_corr_fa,true_fa,'Emp corrected SNR=30','corr_noise')
 corr_lr_noise,mcorr_lr_noise = plot_one_snr(bx_corr_fa,true_fa, 'Emp corrected SNR=30','corr_lr_noise')
 corr_lr,mcorr_lr = plot_one_snr(bx_corr_fa,noise_fa,'Emp corrected SNR=30','corr_lr')
-
-#corr_noise,mcorr_noise = plot_one_snr(Nsm_corr_fa,true_fa,'Approx corrected SNR=30','corr_noise')
-#corr_lr_noise,mcorr_lr_noise = plot_one_snr(sm_corr_fa,true_fa, 'Approx corrected SNR=30','corr_lr_noise')
-#corr_lr,mcorr_lr = plot_one_snr(sm_corr_fa,noise_fa,'Approx corrected SNR=30','corr_lr')
-
-plt.figure()
-sns.set_theme(style="whitegrid")
+plt.figure(1)
 sns.set(font_scale = 1.3)
 pd_data = pd.concat([inf_noise, noise, corr_noise, inf_lr_noise, lr_noise,corr_lr_noise,inf_lr, lr, corr_lr])
 pd_data = pd_data.rename(columns={0:'Abs percent error (%)'})
-ax = sns.violinplot(data=pd_data, hue = 'label', x = 'x',y='Abs percent error (%)',dodge=False,width=.5,gridsize=2000)
-sns.despine(left=True)
-ax.set(xlabel=' ', ylabel = 'Abs percent error in FA (%) abs ( ( a - b / b ) * 100 )')
+sns.set_style("white")
+palette = {'Uncorrected SNR=inf': 'crimson', 'Uncorrected SNR=30': 'cornflowerblue', 'Emp corrected SNR=30': 'limegreen'}
+plt.subplot(3,1,2)
+ax = sns.violinplot(data=pd_data, hue = 'label', x = 'x',y='Abs percent error (%)',dodge=False,width=.5,gridsize=10000,palette=palette)
+ax.set(xlabel=' ', ylabel = 'APE in MD (%)')
 ax.set_xticklabels(['','noise FA - GT FA','','','noise+LR FA - GT FA','','','noise+LR FA - noise FA',''])
-
 m1 = np.concatenate([minf_noise, mnoise, mcorr_noise, minf_lr_noise, mlr_noise,mcorr_lr_noise,minf_lr, mlr, mcorr_lr])
 print(m1)
 mL1 = [(np.round(s, 2)) for s in m1]
@@ -73,7 +68,10 @@ for xtick in ax.get_xticks():
     ax.text(xtick-.2,mL1[xtick] + ( mL1[xtick]*0.05),mL1[xtick],
             horizontalalignment='center',size='x-small',color='k',weight='semibold')
 
-plt.legend(loc='upper right')
-plt.title('Effect of noise and LR on FA in whole brain')
-plt.ylim([-15,150])
+#plt.legend(loc='upper right')
+#plt.title('Effect of noise and LR on FA in whole brain')
+ax.get_legend().remove()
+plt.ylim([-15,100])
+plt.grid()
+plt.tight_layout()
 plt.show()

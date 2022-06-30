@@ -10,10 +10,7 @@ import scipy.io
 import h5py
 import mat73
 
-#SNRinf = mat73.loadmat('/nfs/masi/kanakap/projects/LR/ten_sim/CorrectionLReffectsresults_50_30d_SNRinf.mat')
-#SNR100 = mat73.loadmat('/nfs/masi/kanakap/projects/LR/ten_sim/CorrectionLReffectsresults_50_30d_SNR100.mat')
-SNR30 = mat73.loadmat('/nfs/masi/kanakap/projects/LR/ten_sim/CorrectionLReffectsresults_10_30d_SNR30.mat')
-#SNR10 = mat73.loadmat('/nfs/masi/kanakap/projects/LR/ten_sim/CorrectionLReffectsresults_50_30d_SNR10.mat')
+SNR30 = mat73.loadmat('/nfs/masi/kanakap/projects/LR/ten_sim/CorrectionLReffectsresults_50_30d_SNR30.mat')
 
 def angular_error(PEa, PEb, halfPi=True):
     # PEa = preprocessing.normalize(PEa, norm='l1', axis=1)
@@ -35,10 +32,10 @@ def snr_csf(FA_sim_noise_x,FA_true_x,label,x,pev=False):
         err_fa = FA_sim_noise_x - FA_true_x
         pe_fa =  (err_fa / FA_true_x) * 100
     ape_fa = np.abs(pe_fa)
-    cube = np.reshape(ape_fa, [10, 10, 19406])
+    cube = np.reshape(ape_fa, [50, 50, 19406])
     zzz = np.squeeze(np.mean(cube,2))
     zzz_transp = np.transpose(zzz)
-    brain = zzz_transp[0,]
+    brain = zzz_transp[1,] # 0.03
     df_brain = pd.DataFrame(brain).assign(label = label)
     df_brain = df_brain.assign(x = x)
     #idf_brain = df_brain.rename(columns={0:x})
@@ -53,10 +50,10 @@ def snr_wm(FA_sim_noise_x,FA_true_x,label,x,pev=False):
         err_fa = FA_sim_noise_x - FA_true_x
         pe_fa =  (err_fa / FA_true_x) * 100
     ape_fa = np.abs(pe_fa)
-    cube = np.reshape(ape_fa, [10, 10, 19406])
+    cube = np.reshape(ape_fa, [50, 50, 19406])
     zzz = np.squeeze(np.mean(cube,2))
     zzz_transp = np.transpose(zzz)
-    brain = zzz_transp[7,]
+    brain = zzz_transp[25,] # 0.50
     df_brain = pd.DataFrame(brain).assign(label = label)
     df_brain = df_brain.assign(x = x)
     #idf_brain = df_brain.rename(columns={0:x})
@@ -71,10 +68,10 @@ def snr_gm(FA_sim_noise_x,FA_true_x,label,x,pev=False):
         err_fa = FA_sim_noise_x - FA_true_x
         pe_fa =  (err_fa / FA_true_x) * 100
     ape_fa = np.abs(pe_fa)
-    cube = np.reshape(ape_fa, [10, 10, 19406])
+    cube = np.reshape(ape_fa, [50, 50, 19406])
     zzz = np.squeeze(np.mean(cube,2))
     zzz_transp = np.transpose(zzz)
-    brain = zzz_transp[2,]
+    brain = zzz_transp[13,] # 0.25
     df_brain = pd.DataFrame(brain).assign(label = label)
     df_brain = df_brain.assign(x = x)
     #idf_brain = df_brain.rename(columns={0:x})
@@ -136,9 +133,9 @@ plt.subplot(3,1,1)
 fa_pd_data = violin_plot('FA')
 #ax = sns.violinplot(data=fa_pd_data, hue = 'label', x = 'x',y='Abs percent error (%)',dodge=False,width=.5,gridsize=1500,palette=palette,inner="quart")
 ax = sns.violinplot(data=fa_pd_data, hue = 'label', x = 'x',y='Abs percent error (%)',gridsize=4000,split=True,dodge=False,linewidth=2,scale="width",inner=None,palette=palette)
-ax.set_ylim([-10,100])
-ax.legend(loc='upper right')
 split_voilin()
+ax.set_ylim([-3,50])
+ax.legend(loc='upper right')
 ax.set_ylabel('APE in FA (%)',fontsize=15)
 ax.set_xticklabels(['WM','GM','CSF'],fontsize=15)
 plt.grid()
@@ -146,9 +143,9 @@ plt.grid()
 plt.subplot(3,1,2)
 md_pd_data = violin_plot('MD')
 ax = sns.violinplot(data=md_pd_data, hue = 'label',  x = 'x',y='Abs percent error (%)',gridsize=4000,split=True,dodge=False,linewidth=2,scale="width",inner=None,palette=palette)
-ax.set_ylim([-15,100])
-ax.get_legend().remove()
 split_voilin()
+ax.set_ylim([-1,10])
+ax.get_legend().remove()
 ax.set_ylabel('APE in MD (%)',fontsize=15)
 ax.set_xticklabels(['WM','GM','CSF'],fontsize=15)
 plt.grid()
@@ -156,9 +153,9 @@ plt.grid()
 plt.subplot(3,1,3)
 v1_pd_data = violin_plot('PEV')
 ax = sns.violinplot(data=v1_pd_data, hue = 'label', x = 'x',y='Abs percent error (%)',gridsize=4000,split=True,dodge=False,linewidth=2,scale="width",inner=None,palette=palette)
-ax.set_ylim([-10,100])
-ax.get_legend().remove()
 split_voilin()
+ax.set_ylim([-1,10])
+ax.get_legend().remove()
 ax.set_ylabel('APE in PEV (%)',fontsize=15)
 ax.set_xticklabels(['WM','GM','CSF'],fontsize=15)
 plt.grid()

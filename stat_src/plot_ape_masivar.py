@@ -37,7 +37,7 @@ def plot_one_snr(corpt_fa,true_fa,label,x):
 def pev_df(corpt_fa,true_fa,label,x):
     err_fa = angular_error(corpt_fa,true_fa)
     #pe_fa =  (err_fa / true_fa) * 100
-    ape_fa = np.abs(err_fa)
+    ape_fa = (err_fa)
     ape_fa[np.isnan(ape_fa)] = 0
     ape_fa = np.where(mask,ape_fa,math.nan)
     ape_fa = ape_fa.reshape(-1)
@@ -49,7 +49,8 @@ def pev_df(corpt_fa,true_fa,label,x):
 
 
 def violin_plot(metric):
-    true_fa =  nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_d32_/true__'+metric+'.nii').get_fdata()
+    true_fa =  nib.load('/nfs/masi/kanakap/projects/LR/masivar_input/1/true_'+metric+'.nii').get_fdata()
+    #true_fa =  nib.load('/nfs/masi/kanakap/projects/LR/aggregate_study/OUTPUT_masivar_d32_/true__'+metric+'.nii').get_fdata()
     corpt_fa = nib.load('/nfs/masi/kanakap/projects/LR/masivar_output/SNR30_d32_1/uncorrected_'+metric+'.nii').get_fdata()
     noise_fa = nib.load('/nfs/masi/kanakap/projects/LR/masivar_output/SNR30_d32_1/uncorrected_Nest_'+metric+'.nii').get_fdata()
     lcorpt_fa = nib.load('/nfs/masi/kanakap/projects/LR/masivar_output/SNR30_d32_1/uncorrected_Lest_'+metric+'.nii').get_fdata()
@@ -97,44 +98,44 @@ def violin_plot(metric):
     return pd_data, mL1
 
 plt.subplots(3,1,figsize=(15,20))
-sns.set(font_scale = 1.3)
+sns.set(font_scale = 2)
 sns.set_style("white")
 palette = {'Uncorrected SNR=inf': 'crimson', 'Uncorrected SNR=30': 'cornflowerblue', 'Emp corrected SNR=30': 'limegreen'}
 plt.subplot(3,1,1)
 fa_pd_data,mL1 = violin_plot('fa')
-ax = sns.violinplot(data=fa_pd_data, hue = 'label', x = 'x',y='Abs percent error (%)',dodge=False,width=.5,gridsize=1500,palette=palette,inner="quart")
+ax = sns.violinplot(data=fa_pd_data, hue = 'label', x = 'x',y='Abs percent error (%)',dodge=False,width=.5,gridsize=2000,palette=palette,inner="box",bw=0.08)
 ax.set_ylim([-10,100])
-ax.legend(loc='upper right')
+ax.legend(loc='upper right', prop={'size': 17})
 ax.set(xlabel=' ', ylabel = 'APE in FA (%)')
-for xtick in ax.get_xticks():
-    ax.text(xtick-.3,mL1[xtick] + ( mL1[xtick]*0.05),mL1[xtick],
-            horizontalalignment='center',size='x-small',color='k',weight='semibold')
+#for xtick in ax.get_xticks():
+#    ax.text(xtick-.3,mL1[xtick] + ( mL1[xtick]*0.05),mL1[xtick],
+#            horizontalalignment='center',size='x-small',color='k',weight='semibold')
 ax.set_xticklabels(['','noise FA - GT FA','','','noise+LR FA - GT FA','','','noise+LR FA - noise FA',''])
 plt.grid()
 
 plt.subplot(3,1,2)
 md_pd_data,mL1 = violin_plot('md')
-ax = sns.violinplot(data=md_pd_data, hue = 'label', x = 'x',y='Abs percent error (%)',dodge=False,width=.5,gridsize=10000,palette=palette,inner="quart")
+ax = sns.violinplot(data=md_pd_data, hue = 'label', x = 'x',y='Abs percent error (%)',dodge=False,width=.5,gridsize=10000,palette=palette,inner="box",bw=0.08)
 ax.set_ylim([-15,100])
 ax.get_legend().remove()
 ax.set(xlabel=' ', ylabel = 'APE in MD (%)')
-for xtick in ax.get_xticks():
-    ax.text(xtick-.3,mL1[xtick] + ( mL1[xtick]*0.05),mL1[xtick],
-            horizontalalignment='center',size='x-small',color='k',weight='semibold')
+#for xtick in ax.get_xticks():
+#    ax.text(xtick-.4,mL1[xtick] + ( mL1[xtick]*0.05),mL1[xtick],
+#            horizontalalignment='center',size='x-small',color='k',weight='semibold')
 ax.set_xticklabels(['','noise MD - GT MD','','','noise+LR MD - GT MD','','','noise+LR MD - noise MD',''])
 plt.grid()
 
 plt.subplot(3,1,3)
 v1_pd_data,mL1 = violin_plot('primary_eigvec')
-ax = sns.violinplot(data=v1_pd_data, hue = 'label', x = 'x',y='Abs percent error (%)',dodge=False,width=.5,gridsize=1500,palette=palette,inner="quart")
+ax = sns.violinplot(data=v1_pd_data, hue = 'label', x = 'x',y='Abs percent error (%)',dodge=False,width=.5,gridsize=1500,palette=palette,inner="box",bw=0.08)
 ax.set_ylim([-10,100])
-ax.set(xlabel=' ', ylabel = 'APE in V1 (degrees)')
+ax.set(xlabel=' ', ylabel = 'AE in V1 (°)')
 ax.get_legend().remove()
 
-for xtick in ax.get_xticks():
-    ax.text(xtick-.3,mL1[xtick] + ( mL1[xtick]*0.05),mL1[xtick],
-            horizontalalignment='center',size='x-small',color='k',weight='semibold')
-ax.set_xticklabels(['','noise PEV - GT PEV','','','noise+LR PEV - GT PEV','','','noise+LR PEV - noise PEV',''])
+#for xtick in ax.get_xticks():
+#    ax.text(xtick-.3,mL1[xtick] + ( mL1[xtick]*0.05),mL1[xtick],
+#            horizontalalignment='center',size='x-small',color='k',weight='semibold')
+ax.set_xticklabels(['','noise V1 - GT V1','','','noise+LR V1 - GT V1','','','noise+LR V1 - noise V1',''])
 
 plt.grid()  
 plt.tight_layout()

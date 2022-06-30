@@ -9,11 +9,12 @@ import math
 import scipy.io
 import h5py
 import mat73
+import sys
 
-SNRinf = mat73.loadmat('/nfs/masi/kanakap/projects/LR/ten_sim/CorrectionLReffectsresults_50_30d_SNRinf.mat')
-SNR100 = mat73.loadmat('/nfs/masi/kanakap/projects/LR/ten_sim/CorrectionLReffectsresults_50_30d_SNR100.mat')
-SNR30 = mat73.loadmat('/nfs/masi/kanakap/projects/LR/ten_sim/CorrectionLReffectsresults_50_30d_SNR30.mat')
-SNR10 = mat73.loadmat('/nfs/masi/kanakap/projects/LR/ten_sim/CorrectionLReffectsresults_50_30d_SNR10.mat')
+SNRinf = mat73.loadmat('/nfs/masi/kanakap/projects/LR/ten_sim/CorrectionLReffectsresults_10_30d_SNRinf.mat')
+SNR100 = mat73.loadmat('/nfs/masi/kanakap/projects/LR/ten_sim/CorrectionLReffectsresults_10_30d_SNR100.mat')
+SNR30 = mat73.loadmat('/nfs/masi/kanakap/projects/LR/ten_sim/CorrectionLReffectsresults_10_30d_SNR30.mat')
+SNR10 = mat73.loadmat('/nfs/masi/kanakap/projects/LR/ten_sim/CorrectionLReffectsresults_10_30d_SNR10.mat')
 
 def angular_error(PEa, PEb, halfPi=True):
     # PEa = preprocessing.normalize(PEa, norm='l1', axis=1)
@@ -31,10 +32,10 @@ def snr_brain(FA_sim_noise_x,FA_true_x,label,x):
     err_fa = FA_sim_noise_x - FA_true_x
     pe_fa =  (err_fa / FA_true_x) * 100
     ape_fa = np.abs(pe_fa)
-    cube = np.reshape(ape_fa, [50, 50, 19406])
+    cube = np.reshape(ape_fa, [10, 10, 19406])
     zzz = np.squeeze(np.mean(cube,2))
     zzz_transp = np.transpose(zzz)
-    brain = zzz_transp[13,] # WM
+    brain = zzz_transp[1,] # WM13
     df_brain = pd.DataFrame(brain).assign(x = x)
     df_brain = df_brain.assign(label = label)
     median = df_brain.groupby(['label', 'x'])[0].median().values
@@ -44,10 +45,10 @@ def pev_brain(FA_sim_noise_x,FA_true_x,label,x):
     err_fa = angular_error(FA_sim_noise_x,FA_true_x)
     #pe_fa =  (err_fa / FA_true_x) * 100
     ape_fa = np.abs(err_fa)
-    cube = np.reshape(ape_fa, [50, 50, 19406])
+    cube = np.reshape(ape_fa, [10, 10, 19406])
     zzz = np.squeeze(np.mean(cube,2))
     zzz_transp = np.transpose(zzz)
-    brain = zzz_transp[13,] # WM
+    brain = zzz_transp[1,] # WM
     df_brain = pd.DataFrame(brain).assign(x = x)
     df_brain = df_brain.assign(label = label)
     median = df_brain.groupby(['label', 'x'])[0].median().values
@@ -100,10 +101,6 @@ def violin_plot(metric):
         aLR_brain10,mlr10 = snr_brain(SNR10[metric+'_sim_corpt_x'],SNR10[metric+'_true_x'],'Uncorrected','a10');
         acorr_LR_brain10,mcorr_lr10 = snr_brain(SNR10[metric+'_corr_sm_fy_x'],SNR10[metric+'_sim_noise_x'],'Approx Corrected','a10');
 
-        pd_data = pd.concat([LR_braininf,corr_LR_braininf,LR_brain100,corr_LR_brain100,LR_brain30,corr_LR_brain30,LR_brain10,corr_LR_brain10])
-        pd_data = pd_data.rename(columns={0:'Abs percent error (%)'})
-        apd_data = pd.concat([aLR_braininf,acorr_LR_braininf,aLR_brain100,acorr_LR_brain100,aLR_brain30,acorr_LR_brain30,aLR_brain10,acorr_LR_brain10])
-        apd_data = apd_data.rename(columns={0:'Abs percent error (%)'})
     else:
         LR_braininf,mlrinf = pev_brain(SNRinf[metric+'_sim_corpt_x'],SNRinf[metric+'_true_x'],'Uncorrected','inf');
         corr_LR_braininf,mcorr_lrinf = pev_brain(SNRinf[metric+'_corr_bx_x'],SNRinf[metric+'_sim_noise_x'],'Emp Corrected','inf');
@@ -129,85 +126,28 @@ def violin_plot(metric):
         aLR_brain10,mlr10 = pev_brain(SNR10[metric+'_sim_corpt_x'],SNR10[metric+'_true_x'],'Uncorrected','a10');
         acorr_LR_brain10,mcorr_lr10 = pev_brain(SNR10[metric+'_corr_sm_fy_x'],SNR10[metric+'_sim_noise_x'],'Approx Corrected','a10');
 
-        pd_data = pd.concat([LR_braininf,corr_LR_braininf,LR_brain100,corr_LR_brain100,LR_brain30,corr_LR_brain30,LR_brain10,corr_LR_brain10])
-        pd_data = pd_data.rename(columns={0:'Abs percent error (%)'})
-        apd_data = pd.concat([aLR_braininf,acorr_LR_braininf,aLR_brain100,acorr_LR_brain100,aLR_brain30,acorr_LR_brain30,aLR_brain10,acorr_LR_brain10])
-        apd_data = apd_data.rename(columns={0:'Abs percent error (%)'})
-    return pd_data, apd_data
+    return LR_braininf,LR_brain100,LR_brain30,LR_brain10,corr_LR_braininf,corr_LR_brain100,corr_LR_brain30,corr_LR_brain10,aLR_braininf,aLR_brain100,aLR_brain30,aLR_brain10
 
-plt.subplots(3,2,figsize=(15,20))
-sns.set(font_scale = 1.3)
-sns.set_style("white")
-palette = {'Uncorrected': 'crimson', 'Emp Corrected': 'limegreen'}
-plt.subplot(3,2,1)
-fa_pd_data,afa_pd_data = violin_plot('FA')
-ax = sns.violinplot(data=fa_pd_data, hue = 'label', x = 'x',y='Abs percent error (%)',gridsize=4000,split=True,dodge=False,linewidth=2,scale="width",inner=None,palette=palette)
-#ax.set_ylim([-10,100])
-ax.set_ylim([-1,3])
-ax.legend(loc='upper left')
-split_voilin()
-ax.set_ylabel('APE in FA (%)',fontsize=15)
-ax.set_xticklabels(['Inf','100','30','10'], fontsize=15)
-plt.grid()
+def cohens_d(c1,c0):
+    cohens_d = (mean(c0) - mean(c1)) / (sqrt((stdev(c0) ** 2 + stdev(c1) ** 2) / 2))
+    return cohens_d
 
-plt.subplot(3,2,2)
-palette = {'Uncorrected': 'crimson', 'Approx Corrected': 'cornflowerblue'}
-ax = sns.violinplot(data=afa_pd_data, hue = 'label', x = 'x',y='Abs percent error (%)',gridsize=4000,split=True,dodge=False,linewidth=2,scale="width",inner=None,palette=palette)
-#ax.set_ylim([-10,100])
-ax.set_ylim([-1,3])
-ax.legend(loc='upper left')
-split_voilin()
-ax.set_ylabel(' ',fontsize=15)
-ax.set_xticklabels(['Inf','100','30','10'], fontsize=15)
-plt.grid()
+def run_cohens_d(m):
+    LR_braininf,LR_brain100,LR_brain30,LR_brain10,corr_LR_braininf,corr_LR_brain100,corr_LR_brain30,corr_LR_brain10,aLR_braininf,aLR_brain100,aLR_brain30,aLR_brain10 = violin_plot(m)
+    corpt_emp_inf = cohens_d(LR_braininf['inf'],corr_LR_braininf['inf'])
+    corpt_emp_100 = cohens_d(LR_brain100['100'],corr_LR_brain100['100'])
+    corpt_emp_30 = cohens_d(LR_brain30['30'],corr_LR_brain30['30'])
+    corpt_emp_10 = cohens_d(LR_brain10['10'],corr_LR_brain10['10'])
 
+    corpt_app_inf = cohens_d(LR_braininf['inf'],acorr_LR_braininf['ainf'])
+    corpt_app_100 = cohens_d(LR_brain100['100'],acorr_LR_brain100['a100'])
+    corpt_app_30 = cohens_d(LR_brain30['30'],acorr_LR_brain30['a30'])
+    corpt_app_10 = cohens_d(LR_brain10['10'],acorr_LR_brain10['a10'])
 
-plt.subplot(3,2,3)
-md_pd_data,amd_pd_data = violin_plot('MD')
-palette = {'Uncorrected': 'crimson', 'Emp Corrected': 'limegreen'}
-ax = sns.violinplot(data=md_pd_data, hue = 'label', x = 'x',y='Abs percent error (%)',gridsize=4000,split=True,dodge=False,linewidth=2,scale="width",inner=None,palette=palette)
-#ax.set_ylim([-5,20])
-ax.set_ylim([-1,3])
-ax.get_legend().remove()
-split_voilin()
-ax.set_ylabel('APE in MD (%)',fontsize=15)
-ax.set_xticklabels(['Inf','100','30','10'], fontsize=15)
-plt.grid()
+    emp_app_inf = cohens_d(corr_LR_braininf['inf'],acorr_LR_braininf['ainf'])
+    emp_app_100 = cohens_d(corr_LR_brain100['100'],acorr_LR_brain100['a100'])
+    emp_app_30 = cohens_d(corr_LR_brain30['30'],acorr_LR_brain30['a30'])
+    emp_app_10 = cohens_d(corr_LR_brain10['10'],acorr_LR_brain10['a10'])
+    print(corpt_emp_inf,corpt_emp_100,corpt_emp_30,corpt_emp_10,corpt_app_inf,corpt_app_100,corpt_app_30,corpt_app_10,emp_app_inf,emp_app_100,emp_app_30,emp_app_10)
 
-
-plt.subplot(3,2,4)
-palette = {'Uncorrected': 'crimson', 'Approx Corrected': 'cornflowerblue'}
-ax = sns.violinplot(data=amd_pd_data, hue = 'label', x = 'x',y='Abs percent error (%)',gridsize=4000,split=True,dodge=False,linewidth=2,scale="width",inner=None,palette=palette)
-#ax.set_ylim([-5,20])
-ax.set_ylim([-1,3])
-ax.get_legend().remove()
-split_voilin()
-ax.set_ylabel(' ',fontsize=15)
-ax.set_xticklabels(['Inf','100','30','10'], fontsize=15)
-plt.grid()
-
-plt.subplot(3,2,5)
-v1_pd_data, av1_pd_data = violin_plot('PEV')
-palette = {'Uncorrected': 'crimson', 'Emp Corrected': 'limegreen'}
-ax = sns.violinplot(data=v1_pd_data, hue = 'label', x= 'x',y='Abs percent error (%)',gridsize=4000,split=True,dodge=False,linewidth=2,scale="width",inner=None,palette=palette)
-#ax.set_ylim([-5,20])
-ax.set_ylim([-1,3])
-ax.get_legend().remove()
-split_voilin()
-ax.set_ylabel('APE in PEV (%)',fontsize=15)
-ax.set_xticklabels(['Inf','100','30','10'], fontsize=15)
-plt.grid()
-
-plt.subplot(3,2,6)
-palette = {'Uncorrected': 'crimson', 'Approx Corrected': 'cornflowerblue'}
-ax = sns.violinplot(data=av1_pd_data, hue = 'label', x = 'x',y='Abs percent error (%)',gridsize=4000,split=True,dodge=False,linewidth=2,scale="width",inner=None,palette=palette)
-#ax.set_ylim([-5,20])
-ax.set_ylim([-1,3])
-ax.get_legend().remove()
-split_voilin()
-ax.set_ylabel(' ',fontsize=15)
-ax.set_xticklabels(['Inf','100','30','10'], fontsize=15)
-plt.grid()
-
-plt.tight_layout()
-plt.show()
+run_cohens_d(sys.argv[1])

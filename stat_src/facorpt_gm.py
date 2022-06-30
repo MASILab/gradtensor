@@ -7,11 +7,20 @@ import operator as op
 import xml.etree.cElementTree as et
 import pandas as pd
 import scipy.io as sio
+import sys
+#MD_Lest = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_estimates_study/Lest_fa.nii').get_fdata()
+#MD_true = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_future_fieldmap/p_3tb_posA_mask_fa.nii').get_fdata()
+#atlas_img = nib.load('/home-nfs2/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/slantatlas2subj.nii.gz')
 
-MD_Lest = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_estimates_study/Lest_fa.nii').get_fdata()
-MD_true = nib.load('/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/OUTPUTS_future_fieldmap/p_3tb_posA_mask_fa.nii').get_fdata()
-atlas_img = nib.load('/home-nfs2/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/slantatlas2subj.nii.gz')
+MD_Lest = nib.load('/nfs/masi/kanakap/projects/LR/masivar_output/SNRinf_d32_1/uncorrected_'+ sys.argv[1] + '.nii').get_fdata()
+#MD_Lest = nib.load('/nfs/masi/kanakap/projects/LR/masivar_output/SNRinf_d32_1/emp/emp_corrected_fa.nii').get_fdata()
+#MD_Lest = nib.load('/nfs/masi/kanakap/projects/LR/masivar_output/SNRinf_d32_1/approx_corrected_fa.nii').get_fdata()
+MD_true = nib.load('/nfs/masi/kanakap/projects/LR/masivar_input/1/true_'+ sys.argv[1] + '.nii').get_fdata()
+
+atlas_img = nib.load('/nfs/masi/kanakap/projects/LR/masivar_input/1/slant2subj.nii.gz')
 atlas = atlas_img.get_fdata()
+t1_seg = nib.load('/nfs/masi/kanakap/projects/LR/masivar_input/1/slant_output/FinalResult/sub-cIIs00_ses-s1Bx1_acq-r10x10x10_T1w_seg.nii.gz')
+t1_seg_img = t1_seg.get_fdata()
 LR = sio.loadmat('../src/LRfield_posA.mat')
 vL = LR['vL']
 
@@ -22,11 +31,14 @@ alldiff = []
 L_det_roi = []
 allL_det = {}
 for i in range(1,208):
-    for x in range(96):
-        for y in range(96):
-            for z in range(68):
+    for x in range(MD_true.shape[0]):
+        for y in range(MD_true.shape[1]):
+            for z in range(MD_true.shape[2]):
                  if atlas[x,y,z] == i:
-                     diff = (MD_Lest[x,y,z] - MD_true[x,y,z])
+                     err_fa = (MD_Lest[x,y,z] - MD_true[x,y,z])
+                     pe_fa = ( err_fa / MD_true[x,y,z]) * 100
+                     ape_fa = np.abs(pe_fa)
+                     diff = ape_fa
                      alldiff.append(diff)
                      alltrue.append(MD_true[x,y,z])
                      allalldiff.append(diff)
@@ -45,11 +57,13 @@ avg_md_diff_labels = {}
 for k,v in MD_diff.items():
     # v is the list of grades for student k
     avg_md_diff_labels[k] = np.nansum(v)/ float(len(v))
-MD_diff_atlas = atlas.copy()
-MD_diff_atlas[MD_diff_atlas == 0.0] = np.nan
+MD_diff_atlas = t1_seg_img.copy()
+#MD_diff_atlas[MD_diff_atlas == 0.0] = np.nan
 for i in avg_md_diff_labels.keys():
     MD_diff_atlas[MD_diff_atlas == i] = avg_md_diff_labels[i]
-nib.save(nib.Nifti1Image(MD_diff_atlas,atlas_img.affine),'/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/ISMRM_corpt/FAdiff_avg_gmlabels.nii.gz')
+#nib.save(nib.Nifti1Image(MD_diff_atlas,atlas_img.affine),'/home/local/VANDERBILT/kanakap/gradtensor_data/10_29_2019_human_repositioned/3tb/posA/ISMRM_corpt/FAdiff_avg_gmlabels.nii.gz')
+img_save = nib.Nifti1Image(MD_diff_atlas,t1_seg.affine)
+nib.save(img_save,'/nfs/masi/kanakap/projects/LR/masivar_output/SNRinf_d32_1/'+ sys.argv[1] +'_diff_gm_seg.nii.gz')
 
 # change key to roi names
 filename = '/nfs/masi/hansencb/10_29_2019_human_repositioned/3tb/posA/slant/OUTPUTS/FinalVolTxt/T1_label_volumes.txt'
@@ -70,24 +84,26 @@ for i,j in zip(key_list,slant_roi):
     allL_det[j] = allL_det[i]
     del allL_det[i]
 
-# get the mean
+ #get the mean
 Ldet_mean = {key: np.mean(allL_det[key]) for key in allL_det}
 sorted_Ldet_mean = dict(sorted(Ldet_mean.items(), key=lambda item: item[1]))
 sorted_MDdiff_Ldet = dict(sorted(MD_diff.items(), key=lambda kv: sorted_Ldet_mean[kv[0]]))
 print(sorted_Ldet_mean.values())
 
-# dict to df to plot in seaborn
+ #dict to df to plot in seaborn
 df = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in MD_diff.items() ]))
 sorted_index = df.median().sort_values().index
 df_sorted=df[sorted_index]
-
-#labels, data = MD_diff.keys(), MD_diff.values()
-#sns.set(rc={'figure.figsize':(11.7,50.27)})
+dfmean = round(df.mean(),4)
+dfmean.to_csv('/nfs/masi/kanakap/projects/LR/masivar_output/SNRinf_d32_1/'+sys.argv[1] +'_gm.csv')
+"""
+labels, data = MD_diff.keys(), MD_diff.values()
+sns.set(rc={'figure.figsize':(11.7,50.27)})
 plt.figure(num=1,figsize=(40,40))
 ax = sns.boxplot(data=df_sorted)
 ax.set_xticklabels(ax.get_xticklabels(),rotation=90)
-plt.ylabel('∆ FA')
-#plt.xticks(range(1, len(labels) + 1), labels, rotation=90)
+plt.ylabel(' FA')
+plt.xticks(range(1, len(labels) + 1), labels, rotation=90)
 plt.title('Corruption of GM regions of MR scan at isocenter')
 
 plt.figure(num=2,figsize=(40,40))
@@ -95,13 +111,14 @@ df_md_ldet = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in sorted_MDdiff_Ldet.
 #md_ldet_labels = list(df_md_ldet.columns)
 ax = sns.boxplot(data=df_md_ldet)
 ax.set_xticklabels(ax.get_xticklabels(),rotation=90)
-plt.ylabel('∆ FA')
+plt.ylabel(' FA')
 #plt.yticks(range(1, len(md_ldet_labels) + 1), md_ldet_labels)
 #plt.yticks(md_ldet_labels)
 plt.title('Corruption of GM regions of MR scan at isocenter - sorted by LRfield')
 
 #plt.figure(2)
 #plt.scatter(alltrue,allalldiff)
-#plt.ylabel('∆ FA')
+#plt.ylabel('FA')
 #plt.xlabel('True FA')
 plt.show()
+"""

@@ -7,23 +7,6 @@ import numpy, pandas, researchpy
 import numpy as np
 import pandas as pd
 
-def _cohend(true, corpt):
-    cohen_d = np.zeros((112,112,54))
-    for x in range(112):
-        for y in range(112):
-            for z in range(54):
-                d1 = []
-                d2 = []
-                for i in range(19):
-                    d1.append(true[i][x,y,z])
-                    d2.append(corpt[i][x,y,z])
-                n1, n2 = len(d1), len(d2)
-                s1, s2 = var(d1, ddof=1), var(d2, ddof=1)
-                s = sqrt(((n1 - 1) * s1 + (n2 - 1) * s2) / (n1 + n2 - 2))
-                u1, u2 = mean(d1), mean(d2)
-                cohen_d[x,y,z] =  (u1 - u2) / s
-    return cohen_d
-
 def cohend(true, corpt):
     cohen_d = np.zeros((112,112,54))
     for x in range(112):

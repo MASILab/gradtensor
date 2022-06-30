@@ -31,7 +31,7 @@ def snr_brain(FA_sim_noise_x,FA_true_x,label,x):
     cube = np.reshape(ape_fa, [50, 50, 19406])
     zzz = np.squeeze(np.mean(cube,2))
     zzz_transp = np.transpose(zzz)
-    brain = zzz_transp[2,]
+    brain = zzz_transp[13,] # 0.5 GM
     df_brain = pd.DataFrame(brain).assign(x = x)
     df_brain = df_brain.assign(label = label)
     median = df_brain.groupby(['label', 'x'])[0].median().values
@@ -40,11 +40,11 @@ def snr_brain(FA_sim_noise_x,FA_true_x,label,x):
 def pev_brain(FA_sim_noise_x,FA_true_x,label,x):
     err_fa = angular_error(FA_sim_noise_x,FA_true_x)
     #pe_fa =  (err_fa / FA_true_x) * 100
-    ape_fa = np.abs(err_fa)
+    ape_fa = (err_fa)
     cube = np.reshape(ape_fa, [50, 50, 19406])
     zzz = np.squeeze(np.mean(cube,2))
     zzz_transp = np.transpose(zzz)
-    brain = zzz_transp[2,]
+    brain = zzz_transp[13,] # 0.5 GM
     df_brain = pd.DataFrame(brain).assign(x = x)
     df_brain = df_brain.assign(label = label)
     median = df_brain.groupby(['label', 'x'])[0].median().values
@@ -58,7 +58,7 @@ def violin_plot(metric):
 
         noise_brain30,mnoise = snr_brain(SNR30[metric+'_sim_noise_x'],SNR30[metric+'_true_x'],'Uncorrected SNR=30','noise');
         noiseLR_brain30,mlr_noise = snr_brain(SNR30[metric+'_sim_corpt_x'],SNR30[metric+'_true_x'],'Uncorrected SNR=30','lr_noise');
-        LR_brain30,mlr = snr_brain(SNRinf[metric+'_sim_corpt_x'],SNR30[metric+'_sim_noise_x'],'Uncorrected SNR=30','lr');
+        LR_brain30,mlr = snr_brain(SNR30[metric+'_sim_corpt_x'],SNR30[metric+'_sim_noise_x'],'Uncorrected SNR=30','lr');
 
         corr_noise_brain30,mcorr_noise = snr_brain(SNR30[metric+'_corr_noise_bx_x'],SNR30[metric+'_true_x'],'Emp corrected SNR=30','corr_noise');
         corr_noiseLR_brain30,mcorr_lr_noise = snr_brain(SNR30[metric+'_corr_bx_x'],SNR30[metric+'_true_x'],'Emp corrected SNR=30','corr_lr_noise');
@@ -75,7 +75,7 @@ def violin_plot(metric):
 
         noise_brain30,mnoise = pev_brain(SNR30[metric+'_sim_noise_x'],SNR30[metric+'_true_x'],'Uncorrected SNR=30','noise');
         noiseLR_brain30,mlr_noise = pev_brain(SNR30[metric+'_sim_corpt_x'],SNR30[metric+'_true_x'],'Uncorrected SNR=30','lr_noise');
-        LR_brain30,mlr = pev_brain(SNRinf[metric+'_sim_corpt_x'],SNR30[metric+'_sim_noise_x'],'Uncorrected SNR=30','lr');
+        LR_brain30,mlr = pev_brain(SNR30[metric+'_sim_corpt_x'],SNR30[metric+'_sim_noise_x'],'Uncorrected SNR=30','lr');
 
         corr_noise_brain30,mcorr_noise = pev_brain(SNR30[metric+'_corr_noise_bx_x'],SNR30[metric+'_true_x'],'Emp corrected SNR=30','corr_noise');
         corr_noiseLR_brain30,mcorr_lr_noise = pev_brain(SNR30[metric+'_corr_bx_x'],SNR30[metric+'_true_x'],'Emp corrected SNR=30','corr_lr_noise');
@@ -87,44 +87,45 @@ def violin_plot(metric):
     return pd_data, mL1
 
 plt.subplots(3,1,figsize=(15,20))
-sns.set(font_scale = 1.3)
+sns.set(font_scale = 2)
 sns.set_style("white")
 palette = {'Uncorrected SNR=inf': 'crimson', 'Uncorrected SNR=30': 'cornflowerblue', 'Emp corrected SNR=30': 'limegreen'}
 plt.subplot(3,1,1)
 fa_pd_data,mL1 = violin_plot('FA')
 ax = sns.violinplot(data=fa_pd_data, hue = 'label', x = 'x',y='Abs percent error (%)',dodge=False,width=.5,gridsize=1500,palette=palette)
-ax.set_ylim([-10,100])
-ax.legend(loc='upper right')
+ax.set_ylim([-5,50])
+ax.legend(loc='upper right',prop={'size':17})
 ax.set(xlabel=' ', ylabel = 'APE in FA (%)')
-for xtick in ax.get_xticks():
-    ax.text(xtick-.2,mL1[xtick] + ( mL1[xtick]*0.05),mL1[xtick],
-            horizontalalignment='center',size='x-small',color='k',weight='semibold')
+mL1 = [0.0, 23.82, 23.91, 15.53, 31.73, 23.84, 15.53, 6.54, 0.38]
+#for xtick in ax.get_xticks():
+#    ax.text(xtick-.4,mL1[xtick] + ( mL1[xtick]*0.05),mL1[xtick],
+#            horizontalalignment='center',size='x-small',color='k',weight='semibold')
 ax.set_xticklabels(['','noise FA - GT FA','','','noise+LR FA - GT FA','','','noise+LR FA - noise FA',''])
 plt.grid()
 
 plt.subplot(3,1,2)
 md_pd_data,mL1 = violin_plot('MD')
 ax = sns.violinplot(data=md_pd_data, hue = 'label', x = 'x',y='Abs percent error (%)',dodge=False,width=.5,gridsize=10000,palette=palette)
-ax.set_ylim([-15,100])
+ax.set_ylim([-1,10])
 ax.get_legend().remove()
 ax.set(xlabel=' ', ylabel = 'APE in MD (%)')
-for xtick in ax.get_xticks():
-    ax.text(xtick-.2,mL1[xtick] + ( mL1[xtick]*0.05),mL1[xtick],
-            horizontalalignment='center',size='x-small',color='k',weight='semibold')
+#for xtick in ax.get_xticks():
+#    ax.text(xtick-.2,mL1[xtick] + ( mL1[xtick]*0.05),mL1[xtick],
+#            horizontalalignment='center',size='x-small',color='k',weight='semibold')
 ax.set_xticklabels(['','noise MD - GT MD','','','noise+LR MD - GT MD','','','noise+LR MD - noise MD',''])
 plt.grid()
 
 plt.subplot(3,1,3)
 v1_pd_data,mL1 = violin_plot('PEV')
 ax = sns.violinplot(data=v1_pd_data, hue = 'label', x = 'x',y='Abs percent error (%)',dodge=False,width=.5,gridsize=1500,palette=palette)
-ax.set_ylim([-10,100])
-ax.set(xlabel=' ', ylabel = 'APE in V1 (degrees)')
+ax.set_ylim([-1,10])
+ax.set(xlabel=' ', ylabel = 'AE in V1 (°)')
 ax.get_legend().remove()
 
-for xtick in ax.get_xticks():
-    ax.text(xtick-.2,mL1[xtick] + ( mL1[xtick]*0.05),mL1[xtick],
-            horizontalalignment='center',size='x-small',color='k',weight='semibold')
-ax.set_xticklabels(['','noise PEV - GT PEV','','','noise+LR PEV - GT PEV','','','noise+LR PEV - noise PEV',''])
+#for xtick in ax.get_xticks():
+#    ax.text(xtick-.2,mL1[xtick] + ( mL1[xtick]*0.05),mL1[xtick],
+#            horizontalalignment='center',size='x-small',color='k',weight='semibold')
+ax.set_xticklabels(['','noise V1 - GT V1','','','noise+LR V1 - GT V1','','','noise+LR V1 - noise V1',''])
 plt.grid()  
 
 plt.tight_layout()
