@@ -41,7 +41,8 @@ flags = struct( ...
 spm_reslice({refimg_file; Limg_file},flags);
 [p,n,e] = fileparts(Limg_file);
 rLimg_file = fullfile(p,['r' n e]);
-movefile(rLimg_file,fullfile(out_dir,'L_resamp.nii'));
+L_resamp_file = strcat(out_dir,'/L_resamp.nii');
+movefile(rLimg_file,L_resamp_file);
 rLimg_file = fullfile(out_dir,'L_resamp.nii');
 
 % Load the grad tensor and reshape. Initial dimensions are x,y,z,e where e
@@ -69,6 +70,7 @@ vL = reshape(vL,[3,3,size_VL(1),size_VL(2),size_VL(3)]);
 dwmri_vols = nifti_utils.load_untouch_nii4D_vol_scaled(refimg_file,'double');
 bvec = load(bvec_file);
 bval = load(bval_file);
+bval = bval';
 
 % dwi and non-dwi
 ind_b0 = find(~bval);
@@ -140,5 +142,6 @@ corrected_signal = zeros(size(dwmri_vols));
 corrected_signal(:,:,:,ind_b0) = all_b0_vol ;
 corrected_signal(:,:,:,ind_non_b0) = new_dwi_signal ;
 nii = load_untouch_nii(refimg_file);
+corrected_signal(isnan(corrected_signal)) = 0;
 nii.img = corrected_signal;
 nifti_utils.save_untouch_nii_using_scaled_img_info(fullfile(out_dir, [out_name '_sig']),nii,'double');

@@ -11,7 +11,8 @@ from dipy.tracking.utils import density_map
 
 
 #trk_files = glob(os.path.join('/nfs/masi/kanakap/projects/LR_tract/MASiVar_kids/sub-cIVs001/ses-s1Bx2/tracto_op_1_Lest/bundles/*_cleaned.trk'))
-trk_files = glob(os.path.join('/nfs/masi/kanakap/projects/LR_tract/MASiVar_kids/sub-cIVs001/ses-s1Bx2/tracto_op_1_Lest/tractsegout/TOM_trackings/*.trk'))
+#trk_files = glob(os.path.join('/nfs/masi/kanakap/projects/LR_tract/MASiVar_kids/sub-cIVs001/ses-s1Bx2/tracto_op_1_Lest/tractsegout/TOM_trackings/*.trk'))
+trk_files = glob(os.path.join('/nfs/masi/kanakap/projects/LR_tract/MASiVar_kids/sub-cIVs052/ses-s1Bx1/tracto_op_lr_corr_1/bundles/*_cleaned.trk'))
 
 for trk_file in trk_files:
 

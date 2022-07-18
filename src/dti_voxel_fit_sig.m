@@ -22,6 +22,7 @@ function dti_voxel_fit_sig(dwi_path,bvec_path,bval_path,mask_path, out_dir, out_
 dwi_vols = nifti_utils.load_untouch_nii4D_vol_scaled(dwi_path,'double');
 bvec = load(bvec_path);
 bval = load(bval_path);
+bval = bval';
 
 % dwi and non-dwi
 ind_b0 = find(~bval);
@@ -35,6 +36,7 @@ dwi_vols = dwi_vols(:,:,:,ind_non_b0);
 bvec = load(bvec_path);
 bvec = bvec();
 bval = load(bval_path);
+bval = bval';
 nb = length(bval);
 disp(size(bvec))
 disp(size(bval))

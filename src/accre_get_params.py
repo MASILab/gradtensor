@@ -15,6 +15,7 @@ def get_params():
             if 'APP' in la[10]:
                 p.append(la)
     final = ()
+    count = 1
     for i in p:
         print("************************************************************")
         #print(i)
@@ -29,10 +30,27 @@ def get_params():
         bvec = i[10] + '.bvec'
         bval = i[10] + '.bval'
         a = (sub_sess, dwi, bval, bvec, run, sub, sess)
-        name = 'accre_slurm_scripts/'+ sub + "_" + sess + "_" + bvalue + "_" + run +'.txt'
+        name = 'lr_corr_accre_slurm_scripts/'+ str(count) +'.sh'
         with open(name, 'w') as f: 
-            f.write("/nobackup/p_masi_brain_map/kanakap/LR/scripts/final_pipeline_LR_prequal.sh " + sub_sess +" "+ dwi +" "+ bval +" "+ bvec +" "+ run +" "+ sub +" " + sess)
+            f.write("#!/bin/bash")
             f.write("\n")
+            f.write("#SBATCH --mail-user=praitayini.kanakaraj@vanderbilt.edu")
+            f.write("\n")
+            f.write("#SBATCH --mail-type=FAIL")
+            f.write("\n")
+            f.write("#SBATCH --nodes=1")
+            f.write("\n")
+            f.write("#SBATCH --time=60:00:00")
+            f.write("\n")
+            f.write("#SBATCH --mem=50GB")
+            f.write("\n")
+            f.write("#SBATCH --output=/nobackup/p_masi_brain_map/kanakap/LR/corr_tracklog/log_%A_"+ str(count)+".out")
+            f.write("\n")
+            f.write("module load MATLAB/2017a")
+            f.write("\n")
+            f.write("bash /nobackup/p_masi_brain_map/kanakap/LR/scripts/lr_corr_fx_pipeline.sh " + sub_sess +" "+ dwi +" "+ bval +" "+ bvec +" "+ run +" "+ sub +" " + sess)
+            f.write("\n")
+            count = count + 1
         #print("/scratch/kanakap/LR/log/"+ sub + "_" + sess + "_" + bvalue + "_" + run + ".out")
         #print("/nobackup/p_masi_brain_map/kanakap/LR/scripts/final_pipeline_LR_prequal.sh " + sub_sess +" "+ dwi +" "+ bval +" "+ bvec +" "+ run +" "+ sub +" " + sess)
         #proc = subprocess.Popen(["bash","/home/local/VANDERBILT/kanakap/gradtensor/src/final_pipeline_LR_prequal.sh", sub_sess, dwi, bval, bvec, bvalue, run, sub, sess]) 
