@@ -1,5 +1,6 @@
 import os
 import sys
+import math
 import shutil
 import tempfile
 import numpy as np
@@ -99,19 +100,21 @@ pk_rish1000, final_orders = compute_rish(pk_sh1000)
 emp_rish2000, final_orders = compute_rish(emp_sh2000)
 pk_rish2000, final_orders = compute_rish(pk_sh2000)
 
-rish_acc1000 = []
-rish_acc2000 = []
+rmse1000 = []
+rmse2000 = []
 
 for i in range(4):
-    acc1 = angularCorrCoeff(emp_rish1000[:,:,:,i],pk_rish1000[:,:,:,i])
-    rish_acc1000.append(np.nanmean(np.nanmean(acc1)))
+    MSE = np.square(np.subtract(emp_rish2000[:,:,:,i],pk_rish2000[:,:,:,i])).mean() 
+    RMSE = math.sqrt(MSE)
+    rmse1000.append(np.nanmean(np.nanmean(RMSE)))
 
 for i in range(5):
-    acc2 = angularCorrCoeff(emp_rish2000[:,:,:,i],pk_rish2000[:,:,:,i])
-    rish_acc2000.append(np.nanmean(np.nanmean(acc2)))
+    MSE = np.square(np.subtract(emp_rish2000[:,:,:,i],pk_rish2000[:,:,:,i])).mean() 
+    RMSE = math.sqrt(MSE)
+    rmse2000.append(RMSE)
 
-print('ACC RISH 0 1000 ',rish_acc1000)
-print('ACC RISH 0 2000 ',rish_acc2000)
+print('ACC RISH 0 1000 ',rmse1000)
+print('ACC RISH 0 2000 ',rmse2000)
 
 
 try:
