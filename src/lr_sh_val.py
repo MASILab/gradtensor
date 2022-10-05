@@ -5,10 +5,13 @@ import shutil
 import tempfile
 import numpy as np
 import nibabel as nib
+from scipy import stats
+import matplotlib.pyplot as plt
 from dipy.io import read_bvals_bvecs
 from joblib import Parallel, delayed
 from scilpy.reconst.sh import compute_rish
 from utils import val_pk, val_emp, angularCorrCoeff
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
 # Assign inputs
@@ -19,6 +22,7 @@ ob_file = sys.argv[3]
 vec_folder = sys.argv[4]
 val_folder = sys.argv[5]
 emp_sig = nib.load(sys.argv[6]).get_fdata()
+mask = nib.load(sys.argv[7]).get_fdata()
 
 # get the shell index - to separate the shell 
 og_bval, og_bvec = read_bvals_bvecs(ob_file,og_file)
@@ -88,34 +92,88 @@ results = Parallel(n_jobs=num_cores)(delayed(val_emp)(i,j,k,data,org_bval,corr_b
 
 sh_acc1000 = angularCorrCoeff(emp_sh1000,pk_sh1000)
 sh_acc2000 = angularCorrCoeff(emp_sh2000,pk_sh2000)
+sh_acc1000 = sh_acc1000[mask==1] 
+sh_acc2000 = sh_acc2000[mask==1]
 
 print('ACC SH 1000 ',np.nanmean(np.nanmean(sh_acc1000)))
 print('ACC SH 2000 ',np.nanmean(np.nanmean(sh_acc2000)))
 
 # RISH features
 
-emp_rish1000, final_orders = compute_rish(emp_sh1000)
-pk_rish1000, final_orders = compute_rish(pk_sh1000)
+emp_rish1000, final_orders = compute_rish(emp_sh1000,mask=mask)
+pk_rish1000, final_orders = compute_rish(pk_sh1000,mask=mask)
 
-emp_rish2000, final_orders = compute_rish(emp_sh2000)
-pk_rish2000, final_orders = compute_rish(pk_sh2000)
+emp_rish2000, final_orders = compute_rish(emp_sh2000,mask=mask)
+pk_rish2000, final_orders = compute_rish(pk_sh2000,mask=mask)
 
 rmse1000 = []
 rmse2000 = []
+corr1000 = []
+corr2000 = []
+pvalue1000 = []
+pvalue2000 = []
 
 for i in range(4):
-    MSE = np.square(np.subtract(emp_rish2000[:,:,:,i],pk_rish2000[:,:,:,i])).mean() 
+    a = emp_rish1000[:,:,:,i]
+    b = pk_rish1000[:,:,:,i]
+    MSE = np.square(np.subtract(a,b)).mean() 
     RMSE = math.sqrt(MSE)
-    rmse1000.append(np.nanmean(np.nanmean(RMSE)))
+    rmse1000.append(RMSE)
+    ra = a.flatten()
+    rb = b.flatten()
+    corr, _ = stats.pearsonr(ra,rb)
+    corr1000.append(corr)
+    p = stats.wilcoxon(ra,rb)
+    pvalue1000.append(p.pvalue)
 
 for i in range(5):
-    MSE = np.square(np.subtract(emp_rish2000[:,:,:,i],pk_rish2000[:,:,:,i])).mean() 
+    a = emp_rish2000[:,:,:,i]
+    b = pk_rish2000[:,:,:,i]
+    MSE = np.square(np.subtract(a,b)).mean() 
     RMSE = math.sqrt(MSE)
     rmse2000.append(RMSE)
+    ra = a.flatten()
+    rb = b.flatten()
+    corr, _ = stats.pearsonr(ra,rb)
+    corr2000.append(corr)
+    p = stats.wilcoxon(ra,rb)
+    pvalue2000.append(p.pvalue)
+
 
 print('ACC RISH 0 1000 ',rmse1000)
 print('ACC RISH 0 2000 ',rmse2000)
 
+print('P CORR RISH 0 1000 ',corr1000)
+print('P CORR RISH 0 2000 ',corr2000)
+
+print('P VALUE RISH 0 1000 ',pvalue1000)
+print('P VALUE RISH 0 2000 ',pvalue2000)
+
+def plot_rish(features, ax, row, col):
+    slice_idx = 60
+    slice = features
+    slice = slice[slice_idx, :,:]
+    slice = np.flip(np.rot90(slice,3))
+    slice = np.nan_to_num(slice)
+    ax[row,col].axis('off')
+    cmap = plt.get_cmap('viridis')
+    m = 0
+    M = 5
+    im = ax[row,col].imshow(np.abs(slice), vmin=m, vmax=M, cmap=cmap)
+    divider = make_axes_locatable(ax[row,col])
+    ax = divider.append_axes("right", size="5%", pad=0.05)
+    a = plt.colorbar(im, cax=ax)
+
+plt.rcParams.update({'font.size':12})
+fig, ax = plt.subplots(2,3,figsize=(10,3))
+plot_rish(emp_rish1000[:,:,:,0] , ax, 0,0)
+plot_rish(pk_rish1000[:,:,:,0] , ax, 0,1)
+plot_rish((emp_rish1000[:,:,:,0] - pk_rish1000[:,:,:,0]), ax, 0,2)
+
+plot_rish(emp_rish2000[:,:,:,0] , ax,1,0)
+plot_rish(pk_rish2000[:,:,:,0] , ax,1,1)
+plot_rish((emp_rish2000[:,:,:,0] - pk_rish2000[:,:,:,0]),ax, 1,2)
+plt.savefig('rish_difference.png')
 
 try:
     shutil.rmtree(path)
