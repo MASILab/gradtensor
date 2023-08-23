@@ -298,7 +298,7 @@ opts.TolX = 1e-9;
 opts.PlotFcns=@optimplotfval;
 Lopt_direct = fminsearch(@(L) myLoss2(S_corpt,b0,b,qii,L),L0(:),opts);
 disp(Lopt_direct)
-%% one voxel real kids works
+%% works one voxel real kids 
 n_subj = 6;
 % i = 45; j = 62; k = 26;
 i = 50; j = 53; k = 27;
@@ -344,7 +344,97 @@ opts.TolX = 1e-9;
 opts.PlotFcns=@optimplotfval;
 Lopt_direct = fminsearch(@(L) myLoss2(final_Scorpt,b0,final_b',final_qii,L),L0(:),opts);
 disp(reshape(Lopt_direct,3,3))
-%%
+%%  wm region 
+count = 0;
+n_subj = 6;
+for i = 1:112
+    for j = 1:112
+        for k = 1:54
+            if mask_combined(i, j, k) == 6 
+                qii_stack = cell(1, n_subj);
+                S_stack = cell(1, n_subj);
+                b_stack = cell(1, n_subj);
+                for n = 1:n_subj
+                    d =  (dti_all(i,j,k,:,n));
+                    Dxx = d(1);
+                    Dxy = d(4);
+                    Dxz = d(5);
+                    Dyy = d(2);
+                    Dyz = d(6);
+                    Dzz = d(3);
+                    g = bvec_all(:,:,n);
+                    gx = g(1,:)';
+                    gy = g(2,:)';
+                    gz = g(3,:)';
+                    qii = [Dxx.*gx.^2  2.*Dxx.*gx.*gy  2.*Dxx.*gx.*gz  2.*Dxy.*gx.^2  2.*Dxy.*gx.*gy  2.*Dxy.*gx.*gz  2.*Dxz.*gx.^2  ...
+                        2.*Dxz.*gx.*gy  2.*Dxz.*gx.*gz  Dxx.*gy.^2  2.*Dxx.*gy.*gz  2.*Dxy.*gx.*gy  2.*Dxy.*gy.^2  2.*Dxy.*gy.*gz  ...
+                        2.*Dxz.*gx.*gy  2.*Dxz.*gy.^2  2.*Dxz.*gy.*gz  Dxx.*gz.^2  2.*Dxy.*gx.*gz  2.*Dxy.*gy.*gz  2.*Dxy.*gz.^2  ...
+                        2.*Dxz.*gx.*gz  2.*Dxz.*gy.*gz  2.*Dxz.*gz.^2  Dyy.*gx.^2  2.*Dyy.*gx.*gy  2.*Dyy.*gx.*gz  2.*Dyz.*gx.^2  ...
+                        2.*Dyz.*gx.*gy  2.*Dyz.*gx.*gz  Dyy.*gy.^2  2.*Dyy.*gy.*gz  2.*Dyz.*gx.*gy  2.*Dyz.*gy.^2  2.*Dyz.*gy.*gz  ...
+                        Dyy.*gz.^2  2.*Dyz.*gx.*gz  2.*Dyz.*gy.*gz  2.*Dyz.*gz.^2  Dzz.*gx.^2  2.*Dzz.*gx.*gy  2.*Dzz.*gx.*gz  ...
+                        Dzz.*gy.^2  2.*Dzz.*gy.*gz  Dzz.*gz.^2];
+                    qii_stack{n} = qii;
+
+                    b0 = b0_all(i,j,k,n);
+                    S_corpt = squeeze(dwi_all(i,j,k,:,n)) / b0; 
+                    S_stack{n} = S_corpt;
+
+                    b = squeeze(bval_all_nonb0(:,:,n));
+                    b_stack{n} = b';
+                end
+                final_qii = vertcat(qii_stack{:});
+                final_Scorpt = vertcat(S_stack{:});
+                final_b = vertcat(b_stack{:});
+
+                L0 = diag([1 1 1]);
+                opts.TolFun=1e-9;
+                opts.TolX = 1e-9;
+                Lopt(i,j,k,:) = fminsearch(@(L) myLoss2(final_Scorpt,b0,final_b',final_qii,L),L0(:),opts);
+                count = count + 1;
+                disp(count)
+                disp(reshape(Lopt,3,3))
+            end
+        end
+    end
+end     
+%% Save L
+Lxx = Lopt(:,:,:,1);
+Lxy = Lopt(:,:,:,2);
+Lxz = Lopt(:,:,:,3);
+Lyx = Lopt(:,:,:,4);
+Lyy = Lopt(:,:,:,5);
+Lyz = Lopt(:,:,:,6);
+Lzx = Lopt(:,:,:,7);
+Lzy = Lopt(:,:,:,8);
+Lzz = Lopt(:,:,:,9);
+
+true_L = '/nfs/masi/kanakap/projects/estimate/L_image_space.nii';
+Vref = spm_vol(true_L);
+Vref = Vref(1);
+Vout = rmfield(Vref,{'pinfo','private'});
+Vout.dt(1) = spm_type('float32');
+Vout.descrip = 'L matrix';
+
+Limg_file = fullfile('/nfs/masi/kanakap/projects/estimate/kids_estimated_L.nii');
+Vout.fname = Limg_file;
+Vout.n(1) = 1;
+spm_write_vol(Vout,Lxx);
+Vout.n(1) = 2;
+spm_write_vol(Vout,Lxy);
+Vout.n(1) = 3;
+spm_write_vol(Vout,Lxz);
+Vout.n(1) = 4;
+spm_write_vol(Vout,Lyx);
+Vout.n(1) = 5;
+spm_write_vol(Vout,Lyy);
+Vout.n(1) = 6;
+spm_write_vol(Vout,Lyz);
+Vout.n(1) = 7;
+spm_write_vol(Vout,Lzx);
+Vout.n(1) = 8;
+spm_write_vol(Vout,Lzy);
+Vout.n(1) = 9;
+spm_write_vol(Vout,Lzz);
 %% True L 
 
 true_L = '/nfs/masi/kanakap/projects/estimate/L_image_space.nii.gz';
